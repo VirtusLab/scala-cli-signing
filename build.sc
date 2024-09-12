@@ -32,7 +32,7 @@ object Deps {
 
 object Scala {
   def scala213 = "2.13.14"
-  def scala3   = "3.3.1"
+  def scala3   = "3.3.3"
 }
 
 def ghOrg  = "VirtusLab"
