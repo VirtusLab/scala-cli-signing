@@ -53,7 +53,7 @@ jobs:
           .github/scripts/generate-native-image-windows.sh
         shell: bash
         if: runner.os == 'Windows'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: launchers
           path: artifacts/
@@ -78,7 +78,7 @@ jobs:
           ./mill -i "native-cli.static-image.writeNativeImageScript" generate.sh "" && \
           ./generate.sh && \
           ./mill -i "native-cli.static-image.copyToArtifacts" artifacts/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: launchers
           path: artifacts/
@@ -103,7 +103,7 @@ jobs:
           ./mill -i "native-cli.mostly-static-image.writeNativeImageScript" generate.sh "" && \
           ./generate.sh && \
           ./mill -i "native-cli.mostly-static-image.copyToArtifacts" artifacts/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: launchers
           path: artifacts/
