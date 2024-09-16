@@ -27,7 +27,7 @@ object Deps {
 
   def graalVmVersion  = "22.3.1"
   def graalVmId       = s"graalvm-java17:$graalVmVersion"
-  def csDockerVersion = "2.1.4"
+  def csDockerVersion = "2.1.12"
 }
 
 object Scala {
