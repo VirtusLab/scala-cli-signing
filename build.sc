@@ -53,7 +53,8 @@ trait ScalaCliSigningPublish extends PublishModule {
 }
 
 object shared extends Cross[Shared](Scala.scala213, Scala.scala3)
-class Shared(val crossScalaVersion: String) extends CrossScalaModule with ScalaCliSigningPublish {
+trait Shared extends CrossScalaModule with ScalaCliSigningPublish {
+  override val crossScalaVersion = crossValue
   def ivyDeps = super.ivyDeps() ++ Seq(
     Deps.jsoniterCore,
     Deps.osLib
@@ -89,8 +90,9 @@ trait CliNativeImage extends NativeImage {
 }
 
 object cli extends Cross[Cli](Scala.scala213, Scala.scala3)
-class Cli(val crossScalaVersion: String) extends CrossScalaModule with ScalaCliSigningPublish {
+trait Cli extends CrossScalaModule with ScalaCliSigningPublish {
   self =>
+  override val crossScalaVersion = crossValue
   def ivyDeps = super.ivyDeps() ++ Seq(
     Deps.bouncycastle,
     Deps.caseApp,
@@ -156,7 +158,7 @@ trait CliTests extends ScalaModule {
   def testLauncher: T[PathRef]
   def cliKind: T[String]
 
-  def scalaVersion = Scala.scala3
+  override def scalaVersion = Scala.scala3
 
   def prefix = "integration-"
   private def updateRef(name: String, ref: PathRef): PathRef = {
@@ -184,7 +186,7 @@ trait CliTests extends ScalaModule {
     super.resources() ++ Seq(mainPath)
   }
 
-  trait Tests extends super.Tests {
+  trait Tests extends ScalaTests with TestModule.Munit {
     def ivyDeps = super.ivyDeps() ++ Agg(
       Deps.expecty,
       Deps.munit
@@ -213,9 +215,11 @@ trait CliTests extends ScalaModule {
 }
 
 object `jvm-integration` extends Cross[JvmIntegration](Scala.scala213, Scala.scala3)
-class JvmIntegration(val crossScalaVersion: String) extends CliTests {
-  def testLauncher = cli(crossScalaVersion).launcher()
-  def cliKind      = "jvm"
+trait JvmIntegration extends CrossScalaModule with CliTests { self =>
+  scalaVersion
+  override val crossScalaVersion = crossValue
+  def testLauncher               = cli(crossScalaVersion).launcher()
+  def cliKind                    = "jvm"
 
   object test extends Tests
 }
