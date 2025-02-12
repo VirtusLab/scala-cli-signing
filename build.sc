@@ -1,4 +1,4 @@
-import $ivy.`io.github.alexarchambault.mill::mill-native-image::0.1.29`
+import $ivy.`io.github.alexarchambault.mill::mill-native-image::0.1.30`
 import $ivy.`io.github.alexarchambault.mill::mill-native-image-upload:0.1.29`
 
 import $file.publish, publish.{finalPublishVersion, publishSonatype => publishSonatype0}
