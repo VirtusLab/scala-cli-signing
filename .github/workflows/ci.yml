@@ -32,7 +32,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, windows-latest, macos-latest]
+        os: [ubuntu-20.04, windows-2025, macos-13, macos-14]
+        include:
+          - os: ubuntu-20.04
+            platform: ubuntu
+          - os: windows-2025
+            platform: windows
+          - os: macos-13
+            platform: mac
+          - os: macos-14
+            platform: mac-aarch64
     steps:
       - uses: actions/checkout@v3
         with:
@@ -53,9 +62,9 @@ jobs:
           .github/scripts/generate-native-image-windows.sh
         shell: bash
         if: runner.os == 'Windows'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: launchers
+          name: launchers-${{ matrix.platform }}
           path: artifacts/
           if-no-files-found: error
           retention-days: 1
@@ -78,9 +87,9 @@ jobs:
           ./mill -i "native-cli.static-image.writeNativeImageScript" generate.sh "" && \
           ./generate.sh && \
           ./mill -i "native-cli.static-image.copyToArtifacts" artifacts/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: launchers
+          name: launchers-static
           path: artifacts/
           if-no-files-found: error
           retention-days: 1
@@ -103,9 +112,9 @@ jobs:
           ./mill -i "native-cli.mostly-static-image.writeNativeImageScript" generate.sh "" && \
           ./generate.sh && \
           ./mill -i "native-cli.mostly-static-image.copyToArtifacts" artifacts/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: launchers
+          name: launchers-mostly-static
           path: artifacts/
           if-no-files-found: error
           retention-days: 1
@@ -125,9 +134,34 @@ jobs:
       - uses: coursier/setup-action@v1
         with:
           jvm: "temurin:17"
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: launchers
+          name: launchers-ubuntu
+          path: artifacts/
+      - name: Get Windows launchers
+        uses: actions/download-artifact@v4
+        with:
+          name: launchers-windows
+          path: artifacts/
+      - name: Get Mac launchers
+        uses: actions/download-artifact@v4
+        with:
+          name: launchers-mac
+          path: artifacts/
+      - name: Get Mac aarch64 launchers
+        uses: actions/download-artifact@v4
+        with:
+          name: launchers-mac-aarch64
+          path: artifacts/
+      - name: Get static launchers
+        uses: actions/download-artifact@v4
+        with:
+          name: launchers-static
+          path: artifacts/
+      - name: Get mostly static launchers
+        uses: actions/download-artifact@v4
+        with:
+          name: launchers-mostly-static
           path: artifacts/
       - run: ./mill -i ci.upload artifacts/
         env:
