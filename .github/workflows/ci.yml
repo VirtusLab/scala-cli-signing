@@ -9,7 +9,7 @@ on:
 
 jobs:
   jvm-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -32,9 +32,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, windows-2025, macos-13, macos-14]
+        os: [ubuntu-24.04, windows-2025, macos-13, macos-14]
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             platform: ubuntu
           - os: windows-2025
             platform: windows
@@ -72,7 +72,7 @@ jobs:
         if: github.event_name == 'push'
 
   native-static-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -97,7 +97,7 @@ jobs:
         if: github.event_name == 'push'
 
   native-mostly-static-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -123,7 +123,7 @@ jobs:
 
   upload-launchers:
     needs: [format, jvm-tests, native-tests, native-static-tests, native-mostly-static-tests]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
@@ -169,7 +169,7 @@ jobs:
 
   format:
     timeout-minutes: 15
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v3
       with:
@@ -185,7 +185,7 @@ jobs:
   publish:
     needs: [format, jvm-tests, native-tests, native-static-tests, native-mostly-static-tests]
     if: github.event_name == 'push'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v3
       with:
