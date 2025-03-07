@@ -25,9 +25,10 @@ object Deps {
   def osLib = ivy"com.lihaoyi::os-lib:0.10.6"
   def svm   = ivy"org.graalvm.nativeimage:svm:$graalVmVersion"
 
-  def graalVmVersion  = "22.3.1"
-  def graalVmId       = s"graalvm-java17:$graalVmVersion"
-  def coursierVersion = "2.1.24"
+  def graalVmVersion      = "22.3.1"
+  def graalVmId           = s"graalvm-java17:$graalVmVersion"
+  def coursierVersion     = "2.1.24"
+  def ubuntuDockerVersion = "ubuntu:24.04"
 }
 
 object Scala {
@@ -142,7 +143,7 @@ object `native-cli` extends ScalaModule with ScalaCliSigningPublish { self =>
   object `mostly-static-image` extends CliNativeImage {
     def nativeImageDockerParams = Some(
       NativeImage.linuxMostlyStaticParams(
-        "ubuntu:18.04", // TODO Pin that
+        Deps.ubuntuDockerVersion,
         s"https://github.com/coursier/coursier/releases/download/v${Deps.coursierVersion}/cs-x86_64-pc-linux.gz"
       )
     )
