@@ -27,7 +27,7 @@ object Deps {
 
   def graalVmVersion  = "22.3.1"
   def graalVmId       = s"graalvm-java17:$graalVmVersion"
-  def csDockerVersion = "2.1.12"
+  def coursierVersion = "2.1.24"
 }
 
 object Scala {
@@ -123,7 +123,7 @@ object `native-cli` extends ScalaModule with ScalaCliSigningPublish { self =>
       Some(
         NativeImage.linuxStaticParams(
           s"$helperImageName:latest",
-          s"https://github.com/coursier/coursier/releases/download/v${Deps.csDockerVersion}/cs-x86_64-pc-linux.gz"
+          s"https://github.com/coursier/coursier/releases/download/v${Deps.coursierVersion}/cs-x86_64-pc-linux.gz"
         )
       )
     }
@@ -143,7 +143,7 @@ object `native-cli` extends ScalaModule with ScalaCliSigningPublish { self =>
     def nativeImageDockerParams = Some(
       NativeImage.linuxMostlyStaticParams(
         "ubuntu:18.04", // TODO Pin that
-        s"https://github.com/coursier/coursier/releases/download/v${Deps.csDockerVersion}/cs-x86_64-pc-linux.gz"
+        s"https://github.com/coursier/coursier/releases/download/v${Deps.coursierVersion}/cs-x86_64-pc-linux.gz"
       )
     )
     def nameSuffix = "-mostly-static"
