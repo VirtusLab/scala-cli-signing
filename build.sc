@@ -190,7 +190,8 @@ trait CliTests extends ScalaModule {
   trait Tests extends ScalaTests with TestModule.Munit {
     def ivyDeps = super.ivyDeps() ++ Agg(
       Deps.expecty,
-      Deps.munit
+      Deps.munit,
+      Deps.osLib
     )
     def testFramework = "munit.Framework"
     def forkArgs      = super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m")
