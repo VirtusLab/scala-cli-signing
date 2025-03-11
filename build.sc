@@ -12,11 +12,13 @@ import java.io.File
 object Deps {
   object Versions {
     def jsoniterScala = "2.33.2"
+    def bouncycastle  = "1.80"
   }
-  def bouncycastle    = ivy"org.bouncycastle:bcpg-jdk18on:1.80"
-  def caseApp         = ivy"com.github.alexarchambault::case-app:2.1.0-M30"
-  def coursierPublish = ivy"io.get-coursier.publish:publish_2.13:0.2.0"
-  def expecty         = ivy"com.eed3si9n.expecty::expecty:0.17.0"
+  def bouncycastle      = ivy"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
+  def bouncycastleUtils = ivy"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
+  def caseApp           = ivy"com.github.alexarchambault::case-app:2.1.0-M30"
+  def coursierPublish   = ivy"io.get-coursier.publish:publish_2.13:0.2.0"
+  def expecty           = ivy"com.eed3si9n.expecty::expecty:0.17.0"
   def jsoniterCore =
     ivy"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
   def jsoniterMacros =
@@ -96,6 +98,7 @@ trait Cli extends CrossScalaModule with ScalaCliSigningPublish {
   override val crossScalaVersion = crossValue
   def ivyDeps = super.ivyDeps() ++ Seq(
     Deps.bouncycastle,
+    Deps.bouncycastleUtils,
     Deps.caseApp,
     Deps.coursierPublish // we can probably get rid of that one
   )
@@ -103,6 +106,19 @@ trait Cli extends CrossScalaModule with ScalaCliSigningPublish {
     shared()
   )
   def mainClass = Some("scala.cli.signing.ScalaCliSigning")
+
+  object test extends ScalaTests with TestModule.Munit {
+    def ivyDeps = super.ivyDeps() ++ Agg(
+      Deps.expecty,
+      Deps.munit,
+      Deps.jsoniterMacros
+    )
+    override def forkArgs: T[Seq[String]] = T {
+      super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m", "--add-opens=java.base/java.util=ALL-UNNAMED")
+    }
+
+    override def scalaVersion = crossScalaVersion
+  }
 }
 object `native-cli` extends ScalaModule with ScalaCliSigningPublish { self =>
   private def scalaVer = Scala.scala3
