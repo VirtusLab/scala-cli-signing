@@ -53,9 +53,9 @@ jobs:
           jvm: "temurin:17"
       - run: |
           cs java --update --ttl 0 -version && \
-          ./mill -i "native-cli.base-image.writeNativeImageScript" generate.sh "" && \
+          ./mill -i "native-cli.base-image.writeNativeImageScript" --scriptDest generate.sh --imageDest "" && \
           ./generate.sh && \
-          ./mill -i "native-cli.base-image.copyToArtifacts" artifacts/
+          ./mill -i "native-cli.base-image.copyToArtifacts" --directory artifacts/
         if: runner.os != 'Windows'
       - run: |
           export USE_NATIVE_IMAGE_JAVA_PLATFORM_MODULE_SYSTEM=false
@@ -84,9 +84,9 @@ jobs:
           jvm: "temurin:17"
       - run: |
           cs java --update --ttl 0 -version && \
-          ./mill -i "native-cli.static-image.writeNativeImageScript" generate.sh "" && \
+          ./mill -i "native-cli.static-image.writeNativeImageScript" --scriptDest generate.sh --imageDest "" && \
           ./generate.sh && \
-          ./mill -i "native-cli.static-image.copyToArtifacts" artifacts/
+          ./mill -i "native-cli.static-image.copyToArtifacts" --directory artifacts/
       - uses: actions/upload-artifact@v4
         with:
           name: launchers-static
@@ -109,9 +109,9 @@ jobs:
           jvm: "temurin:17"
       - run: |
           cs java --update --ttl 0 -version && \
-          ./mill -i "native-cli.mostly-static-image.writeNativeImageScript" generate.sh "" && \
+          ./mill -i "native-cli.mostly-static-image.writeNativeImageScript" --scriptDest generate.sh --imageDest "" && \
           ./generate.sh && \
-          ./mill -i "native-cli.mostly-static-image.copyToArtifacts" artifacts/
+          ./mill -i "native-cli.mostly-static-image.copyToArtifacts" --directory artifacts/
       - uses: actions/upload-artifact@v4
         with:
           name: launchers-mostly-static
@@ -163,7 +163,7 @@ jobs:
         with:
           name: launchers-mostly-static
           path: artifacts/
-      - run: ./mill -i ci.upload artifacts/
+      - run: ./mill -i ci.upload --directory artifacts/
         env:
           UPLOAD_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -199,7 +199,7 @@ jobs:
       run: .github/scripts/gpg-setup.sh
       env:
         PGP_SECRET: ${{ secrets.PGP_SECRET }}
-    - run: ./mill -i ci.publishSonatype __.publishArtifacts
+    - run: ./mill -i ci.publishSonatype --tasks __.publishArtifacts
       env:
         PGP_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
