@@ -1,10 +1,12 @@
+package build.project.publish
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.1`
 
 import de.tobiasroeser.mill.vcs.version._
-import mill._, scalalib._
+import mill._
+import scalalib._
 
 import java.nio.charset.Charset
-
+import scala.annotation.unused
 import scala.concurrent.duration._
 
 private def computePublishVersion(state: VcsState, simple: Boolean): String =
@@ -48,15 +50,15 @@ private def computePublishVersion(state: VcsState, simple: Boolean): String =
       .getOrElse(state.format())
       .stripPrefix("v")
 
-def finalPublishVersion = {
+def finalPublishVersion: Target[String] = {
   val isCI = System.getenv("CI") != null
   if (isCI)
-    T.persistent {
+    Task(persistent = true) {
       val state = VcsVersion.vcsState()
       computePublishVersion(state, simple = false)
     }
   else
-    T {
+    Task {
       val state = VcsVersion.vcsState()
       computePublishVersion(state, simple = true)
     }
@@ -90,17 +92,17 @@ def publishSonatype(
     snapshotUri = "https://oss.sonatype.org/content/repositories/snapshots",
     credentials = credentials,
     signed = true,
-    // format: off
     gpgArgs = Seq(
       "--detach-sign",
       "--batch=true",
       "--yes",
-      "--pinentry-mode", "loopback",
-      "--passphrase", pgpPassword,
+      "--pinentry-mode",
+      "loopback",
+      "--passphrase",
+      pgpPassword,
       "--armor",
       "--use-agent"
     ),
-    // format: on
     readTimeout = timeout.toMillis.toInt,
     connectTimeout = timeout.toMillis.toInt,
     log = log,
@@ -112,6 +114,7 @@ def publishSonatype(
 }
 
 // from https://github.com/sbt/sbt-ci-release/blob/35b3d02cc6c247e1bb6c10dd992634aa8b3fe71f/plugin/src/main/scala/com/geirsson/CiReleasePlugin.scala#L33-L39
+@unused
 def isTag: Boolean =
   Option(System.getenv("TRAVIS_TAG")).exists(_.nonEmpty) ||
   Option(System.getenv("CIRCLE_TAG")).exists(_.nonEmpty) ||
