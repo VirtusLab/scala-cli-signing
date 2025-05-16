@@ -4,6 +4,7 @@ import $packages._
 
 import $ivy.`io.github.alexarchambault.mill::mill-native-image::0.1.31-1`
 import $ivy.`io.github.alexarchambault.mill::mill-native-image-upload:0.1.31-1`
+import $ivy.`com.goyeau::mill-scalafix::0.5.1`
 import build.project.publish,
   build.project.publish.{finalPublishVersion, publishSonatype => publishSonatype0}
 import io.github.alexarchambault.millnativeimage.NativeImage
@@ -13,6 +14,7 @@ import scalalib._
 
 import java.io.File
 import scala.annotation.unused
+import com.goyeau.mill.scalafix.ScalafixModule
 
 object Deps {
   object Versions {
@@ -59,9 +61,14 @@ trait ScalaCliSigningPublish extends PublishModule {
   def publishVersion: Target[String] = finalPublishVersion()
 }
 
-object shared extends Shared
-trait Shared extends ScalaModule with ScalaCliSigningPublish {
+trait ScalaCliSigningModule extends ScalaModule with ScalafixModule {
+  override def scalacOptions: Target[Seq[String]] =
+    super.scalacOptions.map(_ ++ Seq("-Wunused:all"))
   override def scalaVersion: Target[String] = Scala.scala3
+}
+
+object shared extends Shared
+trait Shared extends ScalaCliSigningModule with ScalaCliSigningPublish {
   def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
     Deps.jsoniterCore,
     Deps.osLib
@@ -100,9 +107,7 @@ trait CliNativeImage extends NativeImage {
 }
 
 object cli extends Cli
-trait Cli extends ScalaModule with ScalaCliSigningPublish {
-  self =>
-  override def scalaVersion: Target[String] = Scala.scala3
+trait Cli extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
   def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
     Deps.bouncycastle,
     Deps.bouncycastleUtils,
@@ -123,10 +128,9 @@ trait Cli extends ScalaModule with ScalaCliSigningPublish {
     }
   }
 }
-object `native-cli` extends ScalaModule with ScalaCliSigningPublish { self =>
-  def scalaVersion: Target[String] = Task(Scala.scala3)
-  def ivyDeps: Target[Agg[Dep]]    = super.ivyDeps() ++ Seq(Deps.svm)
-  def moduleDeps: Seq[Cli]         = Seq(cli)
+object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
+  def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(Deps.svm)
+  def moduleDeps: Seq[Cli]      = Seq(cli)
 
   def mainClass: Target[Option[String]] = cli.mainClass()
 
@@ -231,7 +235,7 @@ trait CliTests extends ScalaModule {
   }
 }
 
-object `jvm-integration` extends JvmIntegration
+object `jvm-integration` extends JvmIntegration with ScalafixModule
 trait JvmIntegration extends ScalaModule with CliTests { self =>
   override def scalaVersion: Target[String] = Scala.scala3
   def testLauncher: Target[PathRef]         = cli.launcher()
