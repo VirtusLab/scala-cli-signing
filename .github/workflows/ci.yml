@@ -122,7 +122,7 @@ jobs:
         if: github.event_name == 'push'
 
   upload-launchers:
-    needs: [format, jvm-tests, native-tests, native-static-tests, native-mostly-static-tests]
+    needs: [format, scalafix, jvm-tests, native-tests, native-static-tests, native-mostly-static-tests]
     runs-on: ubuntu-24.04
     if: github.event_name == 'push'
     steps:
@@ -178,8 +178,23 @@ jobs:
       - uses: VirtusLab/scala-cli-setup@v1
       - run: scala-cli fmt . --check
 
+  scalafix:
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: true
+      - uses: coursier/cache-action@v6
+      - uses: coursier/setup-action@v1
+        with:
+          jvm: temurin:17
+      - name: Run scalafix
+        run: ./mill -i __.fix --check
+
   publish:
-    needs: [format, jvm-tests, native-tests, native-static-tests, native-mostly-static-tests]
+    needs: [format, scalafix, jvm-tests, native-tests, native-static-tests, native-mostly-static-tests]
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     steps:
