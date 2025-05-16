@@ -20,10 +20,10 @@ jobs:
         with:
           jvm: "temurin:17"
       - run: |
-          ./mill -i "__[_].test"
+          ./mill -i "jvm-integration.test"
         if: runner.os != 'Windows'
       - run: |
-          @call ./mill.bat -i "__[_].test"
+          @call ./mill.bat -i "jvm-integration.test"
         shell: cmd
         if: runner.os == 'Windows'
 

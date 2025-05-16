@@ -39,8 +39,7 @@ object Deps {
 }
 
 object Scala {
-  def scala213 = "2.13.16"
-  def scala3   = "3.3.6"
+  def scala3 = "3.3.6"
 }
 
 def ghOrg  = "VirtusLab"
@@ -60,9 +59,9 @@ trait ScalaCliSigningPublish extends PublishModule {
   def publishVersion: Target[String] = finalPublishVersion()
 }
 
-object shared extends Cross[Shared](Scala.scala213, Scala.scala3)
-trait Shared extends CrossScalaModule with ScalaCliSigningPublish {
-  override val crossScalaVersion: String = crossValue
+object shared extends Shared
+trait Shared extends ScalaModule with ScalaCliSigningPublish {
+  override def scalaVersion: Target[String] = Scala.scala3
   def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
     Deps.jsoniterCore,
     Deps.osLib
@@ -100,17 +99,17 @@ trait CliNativeImage extends NativeImage {
   }
 }
 
-object cli extends Cross[Cli](Scala.scala213, Scala.scala3)
-trait Cli extends CrossScalaModule with ScalaCliSigningPublish {
+object cli extends Cli
+trait Cli extends ScalaModule with ScalaCliSigningPublish {
   self =>
-  override val crossScalaVersion: String = crossValue
+  override def scalaVersion: Target[String] = Scala.scala3
   def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
     Deps.bouncycastle,
     Deps.bouncycastleUtils,
     Deps.caseApp,
     Deps.coursierPublish // we can probably get rid of that one
   )
-  def moduleDeps: Seq[Shared]           = Seq(shared())
+  def moduleDeps: Seq[Shared]           = Seq(shared)
   def mainClass: Target[Option[String]] = Some("scala.cli.signing.ScalaCliSigning")
 
   object test extends ScalaTests with TestModule.Munit {
@@ -122,21 +121,14 @@ trait Cli extends CrossScalaModule with ScalaCliSigningPublish {
     override def forkArgs: T[Seq[String]] = T {
       super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m", "--add-opens=java.base/java.util=ALL-UNNAMED")
     }
-
-    override def scalaVersion: Target[String] = crossScalaVersion
   }
 }
 object `native-cli` extends ScalaModule with ScalaCliSigningPublish { self =>
-  private def scalaVer: String     = Scala.scala3
-  def scalaVersion: Target[String] = scalaVer
-  def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
-    Deps.svm
-  )
-  def moduleDeps: Seq[Cli] = Seq(
-    cli(scalaVer)
-  )
+  def scalaVersion: Target[String] = Task(Scala.scala3)
+  def ivyDeps: Target[Agg[Dep]]    = super.ivyDeps() ++ Seq(Deps.svm)
+  def moduleDeps: Seq[Cli]         = Seq(cli)
 
-  def mainClass: Target[Option[String]] = cli(scalaVer).mainClass()
+  def mainClass: Target[Option[String]] = cli.mainClass()
 
   object `base-image` extends CliNativeImage
   object `static-image` extends CliNativeImage {
@@ -239,12 +231,11 @@ trait CliTests extends ScalaModule {
   }
 }
 
-object `jvm-integration` extends Cross[JvmIntegration](Scala.scala213, Scala.scala3)
-trait JvmIntegration extends CrossScalaModule with CliTests { self =>
-  scalaVersion
-  override val crossScalaVersion: String = crossValue
-  def testLauncher: Target[PathRef]      = cli(crossScalaVersion).launcher()
-  def cliKind                            = "jvm"
+object `jvm-integration` extends JvmIntegration
+trait JvmIntegration extends ScalaModule with CliTests { self =>
+  override def scalaVersion: Target[String] = Scala.scala3
+  def testLauncher: Target[PathRef]         = cli.launcher()
+  def cliKind                               = "jvm"
 
   object test extends Tests
 }
