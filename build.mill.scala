@@ -294,7 +294,9 @@ object ci extends Module {
     Task.Command {
       publishSonatype0(
         data = define.Target.sequence(tasks.value)(),
-        log = Task.ctx().log
+        log = Task.ctx().log,
+        workspace = Task.workspace,
+        env = Task.env
       )
     }
 

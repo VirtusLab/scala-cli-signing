@@ -66,7 +66,9 @@ def finalPublishVersion: Target[String] = {
 
 def publishSonatype(
   data: Seq[PublishModule.PublishData],
-  log: mill.api.Logger
+  log: mill.api.Logger,
+  workspace: os.Path,
+  env: Map[String, String]
 ): Unit = {
 
   val credentials = sys.env("SONATYPE_USERNAME") + ":" + sys.env("SONATYPE_PASSWORD")
@@ -106,6 +108,8 @@ def publishSonatype(
     readTimeout = timeout.toMillis.toInt,
     connectTimeout = timeout.toMillis.toInt,
     log = log,
+    workspace = workspace,
+    env = env,
     awaitTimeout = timeout.toMillis.toInt,
     stagingRelease = isRelease
   )
