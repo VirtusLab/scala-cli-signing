@@ -5,8 +5,7 @@ import $packages._
 import $ivy.`io.github.alexarchambault.mill::mill-native-image::0.1.31-1`
 import $ivy.`io.github.alexarchambault.mill::mill-native-image-upload:0.1.31-1`
 import $ivy.`com.goyeau::mill-scalafix::0.5.1`
-import build.project.publish,
-  build.project.publish.{finalPublishVersion, publishSonatype => publishSonatype0}
+import build.project.publish.{finalPublishVersion, publishSonatype => publishSonatype0}
 import io.github.alexarchambault.millnativeimage.NativeImage
 import io.github.alexarchambault.millnativeimage.upload.Upload
 import mill._
@@ -44,13 +43,14 @@ object Scala {
   def scala3 = "3.3.6"
 }
 
-def ghOrg  = "VirtusLab"
-def ghName = "scala-cli-signing"
-trait ScalaCliSigningPublish extends PublishModule {
+def ghOrg      = "VirtusLab"
+def ghName     = "scala-cli-signing"
+def publishOrg = "org.virtuslab.scala-cli-signing"
+trait ScalaCliSigningPublish extends SonatypeCentralPublishModule {
   import mill.scalalib.publish._
   def pomSettings: Target[PomSettings] = PomSettings(
     description = artifactName(),
-    organization = "org.virtuslab.scala-cli-signing",
+    organization = publishOrg,
     url = s"https://github.com/$ghOrg/$ghName",
     licenses = Seq(License.`Apache-2.0`),
     versionControl = VersionControl.github(ghOrg, ghName),
@@ -292,11 +292,16 @@ object ci extends Module {
   @unused
   def publishSonatype(tasks: mill.main.Tasks[PublishModule.PublishData]): Command[Unit] =
     Task.Command {
+      val publishVersion = finalPublishVersion
+      System.err.println(s"Publish version: $publishVersion")
+      val bundleName = s"$publishOrg-$ghName-$publishVersion"
+      System.err.println(s"Publishing bundle: $bundleName")
       publishSonatype0(
         data = define.Target.sequence(tasks.value)(),
         log = Task.ctx().log,
         workspace = Task.workspace,
-        env = Task.env
+        env = Task.env,
+        bundleName = bundleName
       )
     }
 

@@ -1,11 +1,10 @@
 package build.project.publish
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.1`
-
+import com.lumidion.sonatype.central.client.core.{PublishingType, SonatypeCredentials}
 import de.tobiasroeser.mill.vcs.version._
 import mill._
 import scalalib._
 
-import java.nio.charset.Charset
 import scala.annotation.unused
 import scala.concurrent.duration._
 
@@ -68,10 +67,13 @@ def publishSonatype(
   data: Seq[PublishModule.PublishData],
   log: mill.api.Logger,
   workspace: os.Path,
-  env: Map[String, String]
+  env: Map[String, String],
+  bundleName: String
 ): Unit = {
-
-  val credentials = sys.env("SONATYPE_USERNAME") + ":" + sys.env("SONATYPE_PASSWORD")
+  val credentials = SonatypeCredentials(
+    username = sys.env("SONATYPE_USERNAME"),
+    password = sys.env("SONATYPE_PASSWORD")
+  )
   val pgpPassword = sys.env("PGP_PASSWORD")
   val timeout     = 10.minutes
 
@@ -89,11 +91,8 @@ def publishSonatype(
     )
     set.head
   }
-  val publisher = new scalalib.publish.SonatypePublisher(
-    uri = "https://oss.sonatype.org/service/local",
-    snapshotUri = "https://oss.sonatype.org/content/repositories/snapshots",
+  val publisher = new SonatypeCentralPublisher(
     credentials = credentials,
-    signed = true,
     gpgArgs = Seq(
       "--detach-sign",
       "--batch=true",
@@ -110,11 +109,15 @@ def publishSonatype(
     log = log,
     workspace = workspace,
     env = env,
-    awaitTimeout = timeout.toMillis.toInt,
-    stagingRelease = isRelease
+    awaitTimeout = timeout.toMillis.toInt
   )
-
-  publisher.publishAll(isRelease, artifacts: _*)
+  val publishingType  = if (isRelease) PublishingType.AUTOMATIC else PublishingType.USER_MANAGED
+  val finalBundleName = if (bundleName.nonEmpty) Some(bundleName) else None
+  publisher.publishAll(
+    publishingType = publishingType,
+    singleBundleName = finalBundleName,
+    artifacts = artifacts: _*
+  )
 }
 
 // from https://github.com/sbt/sbt-ci-release/blob/35b3d02cc6c247e1bb6c10dd992634aa8b3fe71f/plugin/src/main/scala/com/geirsson/CiReleasePlugin.scala#L33-L39
