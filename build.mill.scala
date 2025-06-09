@@ -17,15 +17,15 @@ import com.goyeau.mill.scalafix.ScalafixModule
 
 object Deps {
   object Versions {
-    def jsoniterScala = "2.35.3"
+    def jsoniterScala = "2.36.3"
     def bouncycastle  = "1.81"
   }
   def bouncycastle      = ivy"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
   def bouncycastleUtils = ivy"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
   def caseApp           = ivy"com.github.alexarchambault::case-app:2.1.0-M30"
-  def coursierPublish   = ivy"io.get-coursier.publish:publish_2.13:0.2.0"
+  def coursierPublish   = ivy"io.get-coursier.publish:publish_2.13:0.2.1"
   def expecty           = ivy"com.eed3si9n.expecty::expecty:0.17.0"
-  def jsoniterCore =
+  def jsoniterCore      =
     ivy"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
   def jsoniterMacros =
     ivy"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros:${Versions.jsoniterScala}"
@@ -68,7 +68,7 @@ trait ScalaCliSigningModule extends ScalaModule with ScalafixModule {
 }
 
 object shared extends Shared
-trait Shared extends ScalaCliSigningModule with ScalaCliSigningPublish {
+trait Shared  extends ScalaCliSigningModule with ScalaCliSigningPublish {
   def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
     Deps.jsoniterCore,
     Deps.osLib
@@ -83,7 +83,7 @@ trait CliNativeImage extends NativeImage {
   def nativeImageGraalVmJvmId: Target[String]    = Deps.graalVmId
   def nativeImageName                            = "scala-cli-signing"
   def nativeImageClassPath: Target[Seq[PathRef]] = `native-cli`.runClasspath()
-  def nativeImageMainClass: Target[String] = Task {
+  def nativeImageMainClass: Target[String]       = Task {
     `native-cli`.mainClass().getOrElse(sys.error("no main class found"))
   }
   def nativeImageOptions: Target[Seq[String]] = super.nativeImageOptions() ++ Seq(
@@ -107,7 +107,7 @@ trait CliNativeImage extends NativeImage {
 }
 
 object cli extends Cli
-trait Cli extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
+trait Cli  extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
   def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
     Deps.bouncycastle,
     Deps.bouncycastleUtils,
@@ -134,9 +134,9 @@ object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { 
 
   def mainClass: Target[Option[String]] = cli.mainClass()
 
-  object `base-image` extends CliNativeImage
+  object `base-image`   extends CliNativeImage
   object `static-image` extends CliNativeImage {
-    private def helperImageName = "scala-cli-signing-musl"
+    private def helperImageName                                           = "scala-cli-signing-musl"
     def nativeImageDockerParams: Target[Option[NativeImage.DockerParams]] = T {
       buildHelperImage()
       Some(
@@ -180,7 +180,7 @@ trait CliTests extends ScalaModule {
 
   override def scalaVersion: Target[String] = Scala.scala3
 
-  def prefix = "integration-"
+  def prefix                                                 = "integration-"
   private def updateRef(name: String, ref: PathRef): PathRef = {
     val rawPath = ref.path.toString.replace(
       File.separator + name + File.separator,
@@ -189,10 +189,10 @@ trait CliTests extends ScalaModule {
     PathRef(os.Path(rawPath))
   }
   private def mainArtifactName: Target[String] = Task(artifactName())
-  def modulesPath: Target[PathRef] = Task {
+  def modulesPath: Target[PathRef]             = Task {
     val name                = mainArtifactName().stripPrefix(prefix)
     val baseIntegrationPath = os.Path(moduleDir.toString.stripSuffix(name))
-    val p = os.Path(
+    val p                   = os.Path(
       baseIntegrationPath.toString.stripSuffix(baseIntegrationPath.baseName)
     )
     PathRef(p)
@@ -212,8 +212,8 @@ trait CliTests extends ScalaModule {
       Deps.munit,
       Deps.osLib
     )
-    def testFramework                 = "munit.Framework"
-    def forkArgs: Target[Seq[String]] = super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m")
+    def testFramework                        = "munit.Framework"
+    def forkArgs: Target[Seq[String]]        = super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m")
     def forkEnv: Target[Map[String, String]] = super.forkEnv() ++ Seq(
       "SIGNING_CLI"      -> testLauncher().path.toString,
       "SIGNING_CLI_KIND" -> cliKind(),
@@ -236,7 +236,7 @@ trait CliTests extends ScalaModule {
 }
 
 object `jvm-integration` extends JvmIntegration with ScalafixModule
-trait JvmIntegration extends ScalaModule with CliTests { self =>
+trait JvmIntegration     extends ScalaModule with CliTests { self =>
   override def scalaVersion: Target[String] = Scala.scala3
   def testLauncher: Target[PathRef]         = cli.launcher()
   def cliKind                               = "jvm"
@@ -272,7 +272,7 @@ object ci extends Module {
 
     val path      = os.Path(directory, Task.workspace)
     val launchers = os.list(path).filter(os.isFile(_)).map(path => path -> path.last)
-    val ghToken = Option(System.getenv("UPLOAD_GH_TOKEN")).getOrElse {
+    val ghToken   = Option(System.getenv("UPLOAD_GH_TOKEN")).getOrElse {
       sys.error("UPLOAD_GH_TOKEN not set")
     }
     val (tag, overwriteAssets) =
