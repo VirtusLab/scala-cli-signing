@@ -292,7 +292,7 @@ object ci extends Module {
   @unused
   def publishSonatype(tasks: mill.main.Tasks[PublishModule.PublishData]): Command[Unit] =
     Task.Command {
-      val publishVersion = finalPublishVersion
+      val publishVersion = finalPublishVersion()
       System.err.println(s"Publish version: $publishVersion")
       val bundleName = s"$publishOrg-$ghName-$publishVersion"
       System.err.println(s"Publishing bundle: $bundleName")
