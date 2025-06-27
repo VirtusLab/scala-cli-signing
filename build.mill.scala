@@ -17,7 +17,7 @@ import com.goyeau.mill.scalafix.ScalafixModule
 
 object Deps {
   object Versions {
-    def jsoniterScala = "2.36.5"
+    def jsoniterScala = "2.36.6"
     def bouncycastle  = "1.81"
   }
   def bouncycastle      = ivy"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
