@@ -23,7 +23,7 @@ object Deps {
   def bouncycastle      = ivy"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
   def bouncycastleUtils = ivy"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
   def caseApp           = ivy"com.github.alexarchambault::case-app:2.1.0-M30"
-  def coursierPublish   = ivy"io.get-coursier.publish::publish:0.3.0"
+  def coursierPublish   = ivy"io.get-coursier.publish::publish:0.4.1"
   def expecty           = ivy"com.eed3si9n.expecty::expecty:0.17.0"
   def jsoniterCore      =
     ivy"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
