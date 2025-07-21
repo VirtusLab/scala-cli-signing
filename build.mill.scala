@@ -214,13 +214,8 @@ trait CliTests extends ScalaModule {
       Deps.munit,
       Deps.osLib
     )
-    def testFramework                   = "munit.Framework"
-    def forkArgs: T[Seq[String]]        = super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m")
-    def forkEnv: T[Map[String, String]] = super.forkEnv() ++ Seq(
-      "SIGNING_CLI"      -> testLauncher().path.toString,
-      "SIGNING_CLI_KIND" -> cliKind(),
-      "SIGNING_CLI_TMP"  -> tmpDirBase().path.toString
-    )
+    def testFramework            = "munit.Framework"
+    def forkArgs: T[Seq[String]] = super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m")
 
     def sources: T[Seq[PathRef]] = Task {
       val name = mainArtifactName().stripPrefix(prefix)
@@ -243,7 +238,23 @@ trait JvmIntegration     extends ScalaModule with CliTests { self =>
   def testLauncher: T[PathRef]         = cli.launcher()
   def cliKind                          = "jvm"
 
-  object test extends Tests
+  private def mainArtifactName: T[String] = Task(artifactName())
+  def modulesPath: T[PathRef]             = Task {
+    val name                = mainArtifactName().stripPrefix(prefix)
+    val baseIntegrationPath = os.Path(moduleDir.toString.stripSuffix(name))
+    val p                   = os.Path(
+      baseIntegrationPath.toString.stripSuffix(baseIntegrationPath.baseName)
+    )
+    PathRef(p)
+  }
+
+  object test extends Tests {
+    def forkEnv: T[Map[String, String]] = super.forkEnv() ++ Seq(
+      "SIGNING_CLI"      -> testLauncher().path.toString,
+      "SIGNING_CLI_KIND" -> cliKind(),
+      "SIGNING_CLI_TMP"  -> tmpDirBase().path.toString
+    )
+  }
 }
 
 object `native-integration` extends Module {
@@ -251,19 +262,38 @@ object `native-integration` extends Module {
     def testLauncher: T[PathRef] = `native-cli`.`base-image`.nativeImage()
     def cliKind                  = "native"
 
-    object test extends Tests
+    object test extends Tests {
+      def forkEnv: T[Map[String, String]] = super.forkEnv() ++ Seq(
+        "SIGNING_CLI"      -> testLauncher().path.toString,
+        "SIGNING_CLI_KIND" -> cliKind(),
+        "SIGNING_CLI_TMP"  -> tmpDirBase().path.toString
+      )
+    }
   }
   object static extends CliTests {
     def testLauncher: T[PathRef] = `native-cli`.`static-image`.nativeImage()
     def cliKind                  = "native-static"
 
-    object test extends Tests
+    object test extends Tests {
+      def forkEnv: T[Map[String, String]] = super.forkEnv() ++ Seq(
+        "SIGNING_CLI"      -> testLauncher().path.toString,
+        "SIGNING_CLI_KIND" -> cliKind(),
+        "SIGNING_CLI_TMP"  -> tmpDirBase().path.toString
+      )
+    }
   }
   object `mostly-static` extends CliTests {
     def testLauncher: T[PathRef] = `native-cli`.`mostly-static-image`.nativeImage()
     def cliKind                  = "native-mostly-static"
 
-    object test extends Tests
+    object test extends Tests {
+
+      def forkEnv: T[Map[String, String]] = super.forkEnv() ++ Seq(
+        "SIGNING_CLI"      -> testLauncher().path.toString,
+        "SIGNING_CLI_KIND" -> cliKind(),
+        "SIGNING_CLI_TMP"  -> tmpDirBase().path.toString
+      )
+    }
   }
 }
 

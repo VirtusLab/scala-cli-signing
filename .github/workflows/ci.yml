@@ -20,9 +20,9 @@ jobs:
         with:
           jvm: "temurin:17"
       - name: Run unit tests
-        run: ./mill -i --no-filesystem-checker cli.test
+        run: ./mill -i cli.test
       - name: Run JVM integration tests
-        run: ./mill -i --no-filesystem-checker jvm-integration.test
+        run: ./mill -i jvm-integration.test
 
   native-tests:
     runs-on: ${{ matrix.os }}
@@ -65,7 +65,7 @@ jobs:
           path: artifacts/
           if-no-files-found: error
           retention-days: 1
-      - run: ./mill -i --no-filesystem-checker "native-integration.native.test"
+      - run: ./mill -i "native-integration.native.test"
         if: github.event_name == 'push'
 
   native-static-tests:
@@ -90,7 +90,7 @@ jobs:
           path: artifacts/
           if-no-files-found: error
           retention-days: 1
-      - run: ./mill -i --no-filesystem-checker "native-integration.static.test"
+      - run: ./mill -i "native-integration.static.test"
         if: github.event_name == 'push'
 
   native-mostly-static-tests:
@@ -115,7 +115,7 @@ jobs:
           path: artifacts/
           if-no-files-found: error
           retention-days: 1
-      - run: ./mill -i --no-filesystem-checker "native-integration.mostly-static.test"
+      - run: ./mill -i "native-integration.mostly-static.test"
         if: github.event_name == 'push'
 
   upload-launchers:
@@ -188,7 +188,7 @@ jobs:
         with:
           jvm: temurin:17
       - name: Run scalafix
-        run: ./mill -i --no-filesystem-checker __.fix --check
+        run: ./mill -i __.fix --check
 
   publish:
     needs: [format, scalafix, jvm-tests, native-tests, native-static-tests, native-mostly-static-tests]
