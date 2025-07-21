@@ -1,15 +1,17 @@
+//| mvnDeps:
+//| - io.github.alexarchambault.mill::mill-native-image::0.2.0
+//| - io.github.alexarchambault.mill::mill-native-image-upload:0.2.0
+//| - com.goyeau::mill-scalafix::0.6.0
+//| - com.lumidion::sonatype-central-client-requests:0.6.0
 package build
 
-import $packages._
-
-import $ivy.`io.github.alexarchambault.mill::mill-native-image::0.1.31-1`
-import $ivy.`io.github.alexarchambault.mill::mill-native-image-upload:0.1.31-1`
-import $ivy.`com.goyeau::mill-scalafix::0.5.1`
 import build.project.publish.{finalPublishVersion, publishSonatype => publishSonatype0}
 import io.github.alexarchambault.millnativeimage.NativeImage
 import io.github.alexarchambault.millnativeimage.upload.Upload
-import mill._
-import scalalib._
+import mill.*
+import mill.api.{BuildCtx, Task}
+import mill.scalalib.*
+import mill.util.{Tasks, VcsVersion}
 
 import java.io.File
 import scala.annotation.unused
@@ -20,18 +22,18 @@ object Deps {
     def jsoniterScala = "2.36.7"
     def bouncycastle  = "1.81"
   }
-  def bouncycastle      = ivy"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
-  def bouncycastleUtils = ivy"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
-  def caseApp           = ivy"com.github.alexarchambault::case-app:2.1.0-M30"
-  def coursierPublish   = ivy"io.get-coursier.publish::publish:0.4.2"
-  def expecty           = ivy"com.eed3si9n.expecty::expecty:0.17.0"
+  def bouncycastle      = mvn"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
+  def bouncycastleUtils = mvn"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
+  def caseApp           = mvn"com.github.alexarchambault::case-app:2.1.0-M30"
+  def coursierPublish   = mvn"io.get-coursier.publish::publish:0.4.2"
+  def expecty           = mvn"com.eed3si9n.expecty::expecty:0.17.0"
   def jsoniterCore      =
-    ivy"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
+    mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
   def jsoniterMacros =
-    ivy"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros:${Versions.jsoniterScala}"
-  def munit = ivy"org.scalameta::munit:1.1.1"
-  def osLib = ivy"com.lihaoyi::os-lib:0.11.4"
-  def svm   = ivy"org.graalvm.nativeimage:svm:$graalVmVersion"
+    mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros:${Versions.jsoniterScala}"
+  def munit = mvn"org.scalameta::munit:1.1.1"
+  def osLib = mvn"com.lihaoyi::os-lib:0.11.4"
+  def svm   = mvn"org.graalvm.nativeimage:svm:$graalVmVersion"
 
   def graalVmVersion      = "22.3.1"
   def graalVmId           = s"graalvm-java17:$graalVmVersion"
@@ -47,8 +49,8 @@ def ghOrg      = "VirtusLab"
 def ghName     = "scala-cli-signing"
 def publishOrg = "org.virtuslab.scala-cli-signing"
 trait ScalaCliSigningPublish extends SonatypeCentralPublishModule {
-  import mill.scalalib.publish._
-  def pomSettings: Target[PomSettings] = PomSettings(
+  import mill.scalalib.publish.*
+  def pomSettings: T[PomSettings] = PomSettings(
     description = artifactName(),
     organization = publishOrg,
     url = s"https://github.com/$ghOrg/$ghName",
@@ -58,35 +60,35 @@ trait ScalaCliSigningPublish extends SonatypeCentralPublishModule {
       Developer("alexarchambault", "Alex Archambault", "https://github.com/alexarchambault")
     )
   )
-  def publishVersion: Target[String] = finalPublishVersion()
+  def publishVersion: T[String] = finalPublishVersion()
 }
 
 trait ScalaCliSigningModule extends ScalaModule with ScalafixModule {
-  override def scalacOptions: Target[Seq[String]] =
-    super.scalacOptions.map(_ ++ Seq("-Wunused:all"))
-  override def scalaVersion: Target[String] = Scala.scala3
+  override def scalacOptions: T[Seq[String]] =
+    super.scalacOptions() ++ Seq("-Wunused:all")
+  override def scalaVersion: T[String] = Scala.scala3
 }
 
 object shared extends Shared
 trait Shared  extends ScalaCliSigningModule with ScalaCliSigningPublish {
-  def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
+  def mvnDeps: T[Seq[Dep]] = super.mvnDeps() ++ Seq(
     Deps.jsoniterCore,
     Deps.osLib
   )
-  def compileIvyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
+  def compileMvnDeps: T[Seq[Dep]] = super.mvnDeps() ++ Seq(
     Deps.jsoniterMacros
   )
 }
 
 trait CliNativeImage extends NativeImage {
-  def nativeImagePersist: Boolean                = System.getenv("CI") != null
-  def nativeImageGraalVmJvmId: Target[String]    = Deps.graalVmId
-  def nativeImageName                            = "scala-cli-signing"
-  def nativeImageClassPath: Target[Seq[PathRef]] = `native-cli`.runClasspath()
-  def nativeImageMainClass: Target[String]       = Task {
+  def nativeImagePersist: Boolean           = System.getenv("CI") != null
+  def nativeImageGraalVmJvmId: T[String]    = Deps.graalVmId
+  def nativeImageName                       = "scala-cli-signing"
+  def nativeImageClassPath: T[Seq[PathRef]] = `native-cli`.runClasspath()
+  def nativeImageMainClass: T[String]       = Task {
     `native-cli`.mainClass().getOrElse(sys.error("no main class found"))
   }
-  def nativeImageOptions: Target[Seq[String]] = super.nativeImageOptions() ++ Seq(
+  def nativeImageOptions: T[Seq[String]] = super.nativeImageOptions() ++ Seq(
     "--no-fallback",
     "--rerun-class-initialization-at-runtime=org.bouncycastle.jcajce.provider.drbg.DRBG$Default,org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV"
   )
@@ -101,43 +103,43 @@ trait CliNativeImage extends NativeImage {
       name = "scala-cli-signing",
       compress = true,
       suffix = nameSuffix,
-      workspace = Task.workspace
+      workspace = BuildCtx.workspaceRoot
     )
   }
 }
 
 object cli extends Cli
 trait Cli  extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
-  def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(
+  def mvnDeps: T[Seq[Dep]] = super.mvnDeps() ++ Seq(
     Deps.bouncycastle,
     Deps.bouncycastleUtils,
     Deps.caseApp,
     Deps.coursierPublish // we can probably get rid of that one
   )
-  def moduleDeps: Seq[Shared]           = Seq(shared)
-  def mainClass: Target[Option[String]] = Some("scala.cli.signing.ScalaCliSigning")
+  def moduleDeps: Seq[Shared]      = Seq(shared)
+  def mainClass: T[Option[String]] = Some("scala.cli.signing.ScalaCliSigning")
 
   object test extends ScalaTests with TestModule.Munit {
-    def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Agg(
+    def mvnDeps: T[Seq[Dep]] = super.mvnDeps() ++ Seq(
       Deps.expecty,
       Deps.munit,
       Deps.jsoniterMacros
     )
-    override def forkArgs: T[Seq[String]] = T {
+    override def forkArgs: T[Seq[String]] = Task {
       super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m", "--add-opens=java.base/java.util=ALL-UNNAMED")
     }
   }
 }
 object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
-  def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Seq(Deps.svm)
-  def moduleDeps: Seq[Cli]      = Seq(cli)
+  def mvnDeps: T[Seq[Dep]] = super.mvnDeps() ++ Seq(Deps.svm)
+  def moduleDeps: Seq[Cli] = Seq(cli)
 
-  def mainClass: Target[Option[String]] = cli.mainClass()
+  def mainClass: T[Option[String]] = cli.mainClass()
 
   object `base-image`   extends CliNativeImage
   object `static-image` extends CliNativeImage {
-    private def helperImageName                                           = "scala-cli-signing-musl"
-    def nativeImageDockerParams: Target[Option[NativeImage.DockerParams]] = T {
+    private def helperImageName                                      = "scala-cli-signing-musl"
+    def nativeImageDockerParams: T[Option[NativeImage.DockerParams]] = Task {
       buildHelperImage()
       Some(
         NativeImage.linuxStaticParams(
@@ -146,9 +148,9 @@ object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { 
         )
       )
     }
-    def buildHelperImage: Target[Unit] = Task {
+    def buildHelperImage: T[Unit] = Task {
       os.proc("docker", "build", "-t", helperImageName, ".")
-        .call(cwd = Task.workspace / "project" / "musl-image", stdout = os.Inherit)
+        .call(cwd = BuildCtx.workspaceRoot / "project" / "musl-image", stdout = os.Inherit)
       ()
     }
     def writeNativeImageScript(scriptDest: String, imageDest: String = ""): Command[Unit] =
@@ -160,7 +162,7 @@ object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { 
   }
 
   object `mostly-static-image` extends CliNativeImage {
-    def nativeImageDockerParams: Target[Option[NativeImage.DockerParams]] = Some(
+    def nativeImageDockerParams: T[Option[NativeImage.DockerParams]] = Some(
       NativeImage.linuxMostlyStaticParams(
         Deps.ubuntuDockerVersion,
         s"https://github.com/coursier/coursier/releases/download/v${Deps.coursierVersion}/cs-x86_64-pc-linux.gz"
@@ -170,15 +172,15 @@ object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { 
   }
 }
 
-def tmpDirBase: Target[PathRef] = Task(persistent = true) {
+def tmpDirBase: T[PathRef] = Task(persistent = true) {
   PathRef(Task.dest / "working-dir")
 }
 
 trait CliTests extends ScalaModule {
-  def testLauncher: Target[PathRef]
-  def cliKind: Target[String]
+  def testLauncher: T[PathRef]
+  def cliKind: T[String]
 
-  override def scalaVersion: Target[String] = Scala.scala3
+  override def scalaVersion: T[String] = Scala.scala3
 
   def prefix                                                 = "integration-"
   private def updateRef(name: String, ref: PathRef): PathRef = {
@@ -188,8 +190,8 @@ trait CliTests extends ScalaModule {
     )
     PathRef(os.Path(rawPath))
   }
-  private def mainArtifactName: Target[String] = Task(artifactName())
-  def modulesPath: Target[PathRef]             = Task {
+  private def mainArtifactName: T[String] = Task(artifactName())
+  def modulesPath: T[PathRef]             = Task {
     val name                = mainArtifactName().stripPrefix(prefix)
     val baseIntegrationPath = os.Path(moduleDir.toString.stripSuffix(name))
     val p                   = os.Path(
@@ -197,36 +199,36 @@ trait CliTests extends ScalaModule {
     )
     PathRef(p)
   }
-  def sources: Target[Seq[PathRef]] = Task.Sources {
+  def sources: T[Seq[PathRef]] = Task {
     val mainPath = PathRef(modulesPath().path / "integration" / "src" / "main" / "scala")
     super.sources() ++ Seq(mainPath)
   }
-  def resources: Target[Seq[PathRef]] = Task.Sources {
+  def resources: T[Seq[PathRef]] = Task {
     val mainPath = PathRef(modulesPath().path / "integration" / "src" / "main" / "resources")
     super.resources() ++ Seq(mainPath)
   }
 
   trait Tests extends ScalaTests with TestModule.Munit {
-    def ivyDeps: Target[Agg[Dep]] = super.ivyDeps() ++ Agg(
+    def mvnDeps: T[Seq[Dep]] = super.mvnDeps() ++ Seq(
       Deps.expecty,
       Deps.munit,
       Deps.osLib
     )
-    def testFramework                        = "munit.Framework"
-    def forkArgs: Target[Seq[String]]        = super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m")
-    def forkEnv: Target[Map[String, String]] = super.forkEnv() ++ Seq(
+    def testFramework                   = "munit.Framework"
+    def forkArgs: T[Seq[String]]        = super.forkArgs() ++ Seq("-Xmx512m", "-Xms128m")
+    def forkEnv: T[Map[String, String]] = super.forkEnv() ++ Seq(
       "SIGNING_CLI"      -> testLauncher().path.toString,
       "SIGNING_CLI_KIND" -> cliKind(),
       "SIGNING_CLI_TMP"  -> tmpDirBase().path.toString
     )
 
-    def sources: Target[Seq[PathRef]] = Task.Sources {
+    def sources: T[Seq[PathRef]] = Task {
       val name = mainArtifactName().stripPrefix(prefix)
       super.sources().flatMap { ref =>
         Seq(updateRef(name, ref), ref)
       }
     }
-    def resources: Target[Seq[PathRef]] = Task.Sources {
+    def resources: T[Seq[PathRef]] = Task {
       val name = mainArtifactName().stripPrefix(prefix)
       super.resources().flatMap { ref =>
         Seq(updateRef(name, ref), ref)
@@ -237,29 +239,29 @@ trait CliTests extends ScalaModule {
 
 object `jvm-integration` extends JvmIntegration with ScalafixModule
 trait JvmIntegration     extends ScalaModule with CliTests { self =>
-  override def scalaVersion: Target[String] = Scala.scala3
-  def testLauncher: Target[PathRef]         = cli.launcher()
-  def cliKind                               = "jvm"
+  override def scalaVersion: T[String] = Scala.scala3
+  def testLauncher: T[PathRef]         = cli.launcher()
+  def cliKind                          = "jvm"
 
   object test extends Tests
 }
 
 object `native-integration` extends Module {
   object native extends CliTests {
-    def testLauncher: Target[PathRef] = `native-cli`.`base-image`.nativeImage()
-    def cliKind                       = "native"
+    def testLauncher: T[PathRef] = `native-cli`.`base-image`.nativeImage()
+    def cliKind                  = "native"
 
     object test extends Tests
   }
   object static extends CliTests {
-    def testLauncher: Target[PathRef] = `native-cli`.`static-image`.nativeImage()
-    def cliKind                       = "native-static"
+    def testLauncher: T[PathRef] = `native-cli`.`static-image`.nativeImage()
+    def cliKind                  = "native-static"
 
     object test extends Tests
   }
   object `mostly-static` extends CliTests {
-    def testLauncher: Target[PathRef] = `native-cli`.`mostly-static-image`.nativeImage()
-    def cliKind                       = "native-mostly-static"
+    def testLauncher: T[PathRef] = `native-cli`.`mostly-static-image`.nativeImage()
+    def cliKind                  = "native-mostly-static"
 
     object test extends Tests
   }
@@ -270,7 +272,7 @@ object ci extends Module {
   def upload(directory: String = "artifacts/"): Command[Unit] = Task.Command {
     val version = finalPublishVersion()
 
-    val path      = os.Path(directory, Task.workspace)
+    val path      = os.Path(directory, BuildCtx.workspaceRoot)
     val launchers = os.list(path).filter(os.isFile(_)).map(path => path -> path.last)
     val ghToken   = Option(System.getenv("UPLOAD_GH_TOKEN")).getOrElse {
       sys.error("UPLOAD_GH_TOKEN not set")
@@ -286,20 +288,20 @@ object ci extends Module {
       tag = tag,
       dryRun = false,
       overwrite = overwriteAssets
-    )(launchers: _*)
+    )(launchers *)
   }
 
   @unused
-  def publishSonatype(tasks: mill.main.Tasks[PublishModule.PublishData]): Command[Unit] =
+  def publishSonatype(tasks: Tasks[PublishModule.PublishData]): Command[Unit] =
     Task.Command {
       val publishVersion = finalPublishVersion()
       System.err.println(s"Publish version: $publishVersion")
       val bundleName = s"$publishOrg-$ghName-$publishVersion"
       System.err.println(s"Publishing bundle: $bundleName")
       publishSonatype0(
-        data = define.Target.sequence(tasks.value)(),
+        data = Task.sequence(tasks.value)(),
         log = Task.ctx().log,
-        workspace = Task.workspace,
+        workspace = BuildCtx.workspaceRoot,
         env = Task.env,
         bundleName = bundleName
       )
@@ -307,7 +309,7 @@ object ci extends Module {
 
   @unused
   def copyJvm(jvm: String = Deps.graalVmId, dest: String = "jvm"): Command[os.Path] = Task.Command {
-    import sys.process._
+    import sys.process.*
     val command = os.proc(
       "cs",
       "java-home",
@@ -317,9 +319,9 @@ object ci extends Module {
       "--ttl",
       "0"
     )
-    val baseJavaHome = os.Path(command.call().out.text().trim, Task.workspace)
+    val baseJavaHome = os.Path(command.call().out.text().trim, BuildCtx.workspaceRoot)
     System.err.println(s"Initial Java home $baseJavaHome")
-    val destJavaHome = os.Path(dest, Task.workspace)
+    val destJavaHome = os.Path(dest, BuildCtx.workspaceRoot)
     os.copy(baseJavaHome, destJavaHome, createFolders = true)
     System.err.println(s"New Java home $destJavaHome")
     destJavaHome

@@ -1,14 +1,14 @@
 package build.project.publish
-import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.1`
 import com.lumidion.sonatype.central.client.core.{PublishingType, SonatypeCredentials}
-import de.tobiasroeser.mill.vcs.version._
+
 import mill._
+import mill.util.VcsVersion
 import scalalib._
 
 import scala.annotation.unused
 import scala.concurrent.duration._
 
-private def computePublishVersion(state: VcsState, simple: Boolean): String =
+private def computePublishVersion(state: VcsVersion.State, simple: Boolean): String =
   if (state.commitsSinceLastTag > 0)
     if (simple) {
       val versionOrEmpty = state.lastTag
@@ -49,7 +49,7 @@ private def computePublishVersion(state: VcsState, simple: Boolean): String =
       .getOrElse(state.format())
       .stripPrefix("v")
 
-def finalPublishVersion: Target[String] = {
+def finalPublishVersion: T[String] = {
   val isCI = System.getenv("CI") != null
   if (isCI)
     Task(persistent = true) {
@@ -116,7 +116,7 @@ def publishSonatype(
   publisher.publishAll(
     publishingType = publishingType,
     singleBundleName = finalBundleName,
-    artifacts = artifacts: _*
+    artifacts = artifacts *
   )
 }
 
