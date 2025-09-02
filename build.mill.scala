@@ -24,7 +24,7 @@ object Deps {
   }
   def bouncycastle      = mvn"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
   def bouncycastleUtils = mvn"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
-  def caseApp           = mvn"com.github.alexarchambault::case-app:2.1.0-M30"
+  def caseApp           = mvn"com.github.alexarchambault::case-app:2.1.0"
   def coursierPublish   = mvn"io.get-coursier.publish::publish:0.4.2"
   def expecty           = mvn"com.eed3si9n.expecty::expecty:0.17.0"
   def jsoniterCore      =
