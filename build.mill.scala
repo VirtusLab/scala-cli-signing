@@ -81,11 +81,12 @@ trait Shared  extends ScalaCliSigningModule with ScalaCliSigningPublish {
 }
 
 trait CliNativeImage extends NativeImage {
-  def nativeImagePersist: Boolean           = System.getenv("CI") != null
-  def nativeImageGraalVmJvmId: T[String]    = Deps.graalVmId
-  def nativeImageName                       = "scala-cli-signing"
-  def nativeImageClassPath: T[Seq[PathRef]] = `native-cli`.runClasspath()
-  def nativeImageMainClass: T[String]       = Task {
+  def generateNativeImageWithFileSystemChecker: Boolean = false
+  def nativeImagePersist: Boolean                       = System.getenv("CI") != null
+  def nativeImageGraalVmJvmId: T[String]                = Deps.graalVmId
+  def nativeImageName                                   = "scala-cli-signing"
+  def nativeImageClassPath: T[Seq[PathRef]]             = `native-cli`.runClasspath()
+  def nativeImageMainClass: T[String]                   = Task {
     `native-cli`.mainClass().getOrElse(sys.error("no main class found"))
   }
   def nativeImageOptions: T[Seq[String]] = super.nativeImageOptions() ++ Seq(
@@ -192,12 +193,14 @@ trait CliTests extends ScalaModule {
   }
   private def mainArtifactName: T[String] = Task(artifactName())
   def modulesPath: T[PathRef]             = Task {
-    val name                = mainArtifactName().stripPrefix(prefix)
-    val baseIntegrationPath = os.Path(moduleDir.toString.stripSuffix(name))
-    val p                   = os.Path(
-      baseIntegrationPath.toString.stripSuffix(baseIntegrationPath.baseName)
-    )
-    PathRef(p)
+    BuildCtx.withFilesystemCheckerDisabled {
+      val name                = mainArtifactName().stripPrefix(prefix)
+      val baseIntegrationPath = os.Path(moduleDir.toString.stripSuffix(name))
+      val p                   = os.Path(
+        baseIntegrationPath.toString.stripSuffix(baseIntegrationPath.baseName)
+      )
+      PathRef(p)
+    }
   }
   def sources: T[Seq[PathRef]] = Task {
     val mainPath = PathRef(modulesPath().path / "integration" / "src" / "main" / "scala")
@@ -240,6 +243,8 @@ trait CliTests extends ScalaModule {
 object `jvm-integration` extends JvmIntegration with ScalafixModule
 trait JvmIntegration     extends ScalaModule with CliTests { self =>
   override def scalaVersion: T[String] = Scala.scala3
+
+  override def modulesPath: T[PathRef] = super.modulesPath
   def testLauncher: T[PathRef]         = cli.launcher()
   def cliKind                          = "jvm"
 
