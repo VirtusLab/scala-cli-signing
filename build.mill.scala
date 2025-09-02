@@ -32,7 +32,7 @@ object Deps {
   def jsoniterMacros =
     mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros:${Versions.jsoniterScala}"
   def munit = mvn"org.scalameta::munit:1.1.1"
-  def osLib = mvn"com.lihaoyi::os-lib:0.11.4"
+  def osLib = mvn"com.lihaoyi::os-lib:0.11.5"
   def svm   = mvn"org.graalvm.nativeimage:svm:$graalVmVersion"
 
   def graalVmVersion      = "22.3.1"
