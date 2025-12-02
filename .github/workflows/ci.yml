@@ -59,7 +59,7 @@ jobs:
           .github/scripts/generate-native-image-windows.sh
         shell: bash
         if: runner.os == 'Windows'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: launchers-${{ matrix.platform }}
           path: artifacts/
@@ -84,7 +84,7 @@ jobs:
           ./mill -i "native-cli.static-image.writeNativeImageScript" --scriptDest generate.sh --imageDest "" && \
           ./generate.sh && \
           ./mill -i "native-cli.static-image.copyToArtifacts" --directory artifacts/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: launchers-static
           path: artifacts/
@@ -109,7 +109,7 @@ jobs:
           ./mill -i "native-cli.mostly-static-image.writeNativeImageScript" --scriptDest generate.sh --imageDest "" && \
           ./generate.sh && \
           ./mill -i "native-cli.mostly-static-image.copyToArtifacts" --directory artifacts/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: launchers-mostly-static
           path: artifacts/
@@ -131,32 +131,32 @@ jobs:
       - uses: coursier/setup-action@v1
         with:
           jvm: "temurin:17"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: launchers-ubuntu
           path: artifacts/
       - name: Get Windows launchers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: launchers-windows
           path: artifacts/
       - name: Get Mac launchers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: launchers-mac
           path: artifacts/
       - name: Get Mac aarch64 launchers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: launchers-mac-aarch64
           path: artifacts/
       - name: Get static launchers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: launchers-static
           path: artifacts/
       - name: Get mostly static launchers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: launchers-mostly-static
           path: artifacts/
