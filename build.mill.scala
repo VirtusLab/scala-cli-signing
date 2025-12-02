@@ -42,7 +42,7 @@ object Deps {
 }
 
 object Scala {
-  def scala3 = "3.3.6"
+  def scala3 = "3.3.7"
 }
 
 def ghOrg      = "VirtusLab"
