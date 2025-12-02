@@ -11,7 +11,7 @@ jobs:
   jvm-tests:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
@@ -40,7 +40,7 @@ jobs:
           - os: macos-14
             platform: mac-aarch64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
@@ -71,7 +71,7 @@ jobs:
   native-static-tests:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
@@ -96,7 +96,7 @@ jobs:
   native-mostly-static-tests:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
@@ -123,7 +123,7 @@ jobs:
     runs-on: ubuntu-24.04
     if: github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
@@ -168,7 +168,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
@@ -179,7 +179,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
@@ -195,7 +195,7 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
         submodules: true
