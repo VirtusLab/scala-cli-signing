@@ -1,6 +1,6 @@
 //| mvnDeps:
-//| - io.github.alexarchambault.mill::mill-native-image::0.2.2
-//| - io.github.alexarchambault.mill::mill-native-image-upload:0.2.2
+//| - io.github.alexarchambault.mill::mill-native-image::0.2.3
+//| - io.github.alexarchambault.mill::mill-native-image-upload:0.2.3
 //| - com.goyeau::mill-scalafix::0.6.0
 //| - com.lumidion::sonatype-central-client-requests:0.6.0
 package build
@@ -19,30 +19,30 @@ import com.goyeau.mill.scalafix.ScalafixModule
 
 object Deps {
   object Versions {
-    def jsoniterScala = "2.36.7"
-    def bouncycastle  = "1.81"
+    def jsoniterScala = "2.38.5"
+    def bouncycastle  = "1.83"
   }
   def bouncycastle      = mvn"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
   def bouncycastleUtils = mvn"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
   def caseApp           = mvn"com.github.alexarchambault::case-app:2.1.0"
-  def coursierPublish   = mvn"io.get-coursier.publish::publish:0.4.2"
-  def expecty           = mvn"com.eed3si9n.expecty::expecty:0.17.0"
+  def coursierPublish   = mvn"io.get-coursier.publish::publish:0.4.3"
+  def expecty           = mvn"com.eed3si9n.expecty::expecty:0.17.1"
   def jsoniterCore      =
     mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
   def jsoniterMacros =
     mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros:${Versions.jsoniterScala}"
-  def munit = mvn"org.scalameta::munit:1.1.1"
-  def osLib = mvn"com.lihaoyi::os-lib:0.11.5"
+  def munit = mvn"org.scalameta::munit:1.2.1"
+  def osLib = mvn"com.lihaoyi::os-lib:0.11.6"
   def svm   = mvn"org.graalvm.nativeimage:svm:$graalVmVersion"
 
   def graalVmVersion      = "22.3.1"
   def graalVmId           = s"graalvm-java17:$graalVmVersion"
-  def coursierVersion     = "2.1.24"
+  def coursierVersion     = "2.1.25-M19"
   def ubuntuDockerVersion = "ubuntu:24.04"
 }
 
 object Scala {
-  def scala3 = "3.3.6"
+  def scala3 = "3.3.7"
 }
 
 def ghOrg      = "VirtusLab"
