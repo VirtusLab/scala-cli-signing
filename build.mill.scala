@@ -37,7 +37,7 @@ object Deps {
 
   def graalVmVersion      = "22.3.1"
   def graalVmId           = s"graalvm-java17:$graalVmVersion"
-  def coursierVersion     = "2.1.24"
+  def coursierVersion     = "2.1.25-M19"
   def ubuntuDockerVersion = "ubuntu:24.04"
 }
 
