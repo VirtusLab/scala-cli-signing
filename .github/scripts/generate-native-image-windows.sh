@@ -10,6 +10,7 @@ export JAVA_HOME="$(pwd -W | sed 's,/,\\,g')\\jvm"
 export GRAALVM_HOME="$JAVA_HOME"
 export PATH="$(pwd)/bin:$PATH"
 echo "PATH=$PATH"
-./mill.bat -i "native-cli.base-image.writeNativeImageScript" --scriptDest generate-native-image.bat --imageDest ""
+# TODO: get rid of --no-filesystem-checker flag
+./mill.bat -i --no-filesystem-checker "native-cli.base-image.writeNativeImageScript" --scriptDest generate-native-image.bat --imageDest ""
 ./generate-native-image.bat
 ./mill.bat -i "native-cli.base-image.copyToArtifacts" --directory artifacts/
