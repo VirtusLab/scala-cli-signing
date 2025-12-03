@@ -19,26 +19,31 @@ import com.goyeau.mill.scalafix.ScalafixModule
 
 object Deps {
   object Versions {
-    def jsoniterScala = "2.38.5"
-    def bouncycastle  = "1.83"
+    def bouncycastle        = "1.83"
+    def caseApp             = "2.1.0"
+    def coursierPublish     = "0.4.4"
+    def coursierVersion     = "2.1.25-M19"
+    def graalVmVersion      = "22.3.1"
+    def graalVmId           = s"graalvm-java17:$graalVmVersion"
+    def expecty             = "0.17.1"
+    def jsoniterScala       = "2.38.5"
+    def munit               = "1.2.1"
+    def osLib               = "0.11.6"
+    def ubuntuDockerVersion = "ubuntu:24.04"
   }
   def bouncycastle      = mvn"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
   def bouncycastleUtils = mvn"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
-  def caseApp           = mvn"com.github.alexarchambault::case-app:2.1.0"
-  def coursierPublish   = mvn"io.get-coursier.publish::publish:0.4.4"
-  def expecty           = mvn"com.eed3si9n.expecty::expecty:0.17.1"
+  def caseApp           = mvn"com.github.alexarchambault::case-app:${Versions.caseApp}"
+  def coursierPublish   = mvn"io.get-coursier.publish::publish:${Versions.coursierPublish}"
+  def expecty           = mvn"com.eed3si9n.expecty::expecty:${Versions.expecty}"
   def jsoniterCore      =
     mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
   def jsoniterMacros =
     mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros:${Versions.jsoniterScala}"
-  def munit = mvn"org.scalameta::munit:1.2.1"
-  def osLib = mvn"com.lihaoyi::os-lib:0.11.6"
-  def svm   = mvn"org.graalvm.nativeimage:svm:$graalVmVersion"
+  def munit = mvn"org.scalameta::munit:${Versions.munit}"
+  def osLib = mvn"com.lihaoyi::os-lib:${Versions.osLib}"
+  def svm   = mvn"org.graalvm.nativeimage:svm:${Versions.graalVmVersion}"
 
-  def graalVmVersion      = "22.3.1"
-  def graalVmId           = s"graalvm-java17:$graalVmVersion"
-  def coursierVersion     = "2.1.25-M19"
-  def ubuntuDockerVersion = "ubuntu:24.04"
 }
 
 object Scala {
@@ -83,7 +88,7 @@ trait Shared  extends ScalaCliSigningModule with ScalaCliSigningPublish {
 trait CliNativeImage extends NativeImage {
   override def generateNativeImageWithFileSystemChecker: Boolean = false
   override def nativeImagePersist: Boolean                       = System.getenv("CI") != null
-  override def nativeImageGraalVmJvmId: T[String]                = Deps.graalVmId
+  override def nativeImageGraalVmJvmId: T[String]                = Deps.Versions.graalVmId
   override def nativeImageName                                   = "scala-cli-signing"
   override def nativeImageClassPath: T[Seq[PathRef]]             = `native-cli`.runClasspath()
   override def nativeImageMainClass: T[String]                   = Task {
@@ -145,7 +150,7 @@ object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { 
       Some(
         NativeImage.linuxStaticParams(
           s"$helperImageName:latest",
-          s"https://github.com/coursier/coursier/releases/download/v${Deps.coursierVersion}/cs-x86_64-pc-linux.gz"
+          s"https://github.com/coursier/coursier/releases/download/v${Deps.Versions.coursierVersion}/cs-x86_64-pc-linux.gz"
         )
       )
     }
@@ -165,8 +170,8 @@ object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { 
   object `mostly-static-image` extends CliNativeImage {
     override def nativeImageDockerParams: T[Option[NativeImage.DockerParams]] = Some(
       NativeImage.linuxMostlyStaticParams(
-        Deps.ubuntuDockerVersion,
-        s"https://github.com/coursier/coursier/releases/download/v${Deps.coursierVersion}/cs-x86_64-pc-linux.gz"
+        Deps.Versions.ubuntuDockerVersion,
+        s"https://github.com/coursier/coursier/releases/download/v${Deps.Versions.coursierVersion}/cs-x86_64-pc-linux.gz"
       )
     )
     override def nameSuffix = "-mostly-static"
@@ -312,22 +317,23 @@ object ci extends Module {
     }
 
   @unused
-  def copyJvm(jvm: String = Deps.graalVmId, dest: String = "jvm"): Command[os.Path] = Task.Command {
-    import sys.process.*
-    val command = os.proc(
-      "cs",
-      "java-home",
-      "--jvm",
-      jvm,
-      "--update",
-      "--ttl",
-      "0"
-    )
-    val baseJavaHome = os.Path(command.call().out.text().trim, BuildCtx.workspaceRoot)
-    System.err.println(s"Initial Java home $baseJavaHome")
-    val destJavaHome = os.Path(dest, BuildCtx.workspaceRoot)
-    os.copy(baseJavaHome, destJavaHome, createFolders = true)
-    System.err.println(s"New Java home $destJavaHome")
-    destJavaHome
-  }
+  def copyJvm(jvm: String = Deps.Versions.graalVmId, dest: String = "jvm"): Command[os.Path] =
+    Task.Command {
+      import sys.process.*
+      val command = os.proc(
+        "cs",
+        "java-home",
+        "--jvm",
+        jvm,
+        "--update",
+        "--ttl",
+        "0"
+      )
+      val baseJavaHome = os.Path(command.call().out.text().trim, BuildCtx.workspaceRoot)
+      System.err.println(s"Initial Java home $baseJavaHome")
+      val destJavaHome = os.Path(dest, BuildCtx.workspaceRoot)
+      os.copy(baseJavaHome, destJavaHome, createFolders = true)
+      System.err.println(s"New Java home $destJavaHome")
+      destJavaHome
+    }
 }
