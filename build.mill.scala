@@ -65,7 +65,7 @@ trait ScalaCliSigningPublish extends SonatypeCentralPublishModule {
 
 trait ScalaCliSigningModule extends ScalaModule with ScalafixModule {
   override def scalacOptions: T[Seq[String]] =
-    super.scalacOptions() ++ Seq("-Wunused:all")
+    super.scalacOptions() ++ Seq("-Wunused:all", "-deprecation")
   override def scalaVersion: T[String] = Scala.scala3
 }
 
