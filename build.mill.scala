@@ -28,7 +28,7 @@ object Deps {
     def expecty             = "0.17.1"
     def jsoniterScala       = "2.38.5"
     def munit               = "1.2.1"
-    def osLib               = "0.11.6"
+    def osLib               = "0.11.7"
     def ubuntuDockerVersion = "ubuntu:24.04"
   }
   def bouncycastle      = mvn"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
