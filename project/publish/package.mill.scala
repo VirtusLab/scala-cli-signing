@@ -116,7 +116,7 @@ def publishSonatype(
   publisher.publishAll(
     publishingType = publishingType,
     singleBundleName = finalBundleName,
-    artifacts = artifacts *
+    artifacts = artifacts*
   )
 }
 
