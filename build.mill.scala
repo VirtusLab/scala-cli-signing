@@ -27,7 +27,7 @@ object Deps {
     def graalVmId           = s"graalvm-java17:$graalVmVersion"
     def expecty             = "0.17.1"
     def jsoniterScala       = "2.38.9"
-    def munit               = "1.2.4"
+    def munit               = "1.3.1"
     def osLib               = "0.11.8"
     def ubuntuDockerVersion = "ubuntu:24.04"
   }
