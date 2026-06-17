@@ -19,7 +19,7 @@ import com.goyeau.mill.scalafix.ScalafixModule
 
 object Deps {
   object Versions {
-    def bouncycastle        = "1.83"
+    def bouncycastle        = "1.84"
     def caseApp             = "2.1.0"
     def coursierPublish     = "0.4.4"
     def coursierVersion     = "2.1.25-M23"
