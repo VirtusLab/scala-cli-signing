@@ -1,5 +1,5 @@
 package build.project.publish
-import com.lumidion.sonatype.central.client.core.{PublishingType, SonatypeCredentials}
+import mill.javalib.publish.{PublishingType, SonatypeCredentials}
 
 import mill._
 import mill.util.VcsVersion
