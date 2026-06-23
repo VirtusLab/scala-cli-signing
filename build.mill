@@ -94,9 +94,19 @@ trait CliNativeImage extends NativeImage {
   override def nativeImageMainClass: T[String]                   = Task {
     `native-cli`.mainClass().getOrElse(sys.error("no main class found"))
   }
+  private def bouncycastleRerunClasses: List[String] = List(
+    "org.bouncycastle.jcajce.provider.drbg.DRBG$Default",
+    "org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV",
+    "org.bouncycastle.jcajce.provider.drbg.DRBG",
+    "org.bouncycastle.jcajce.provider.drbg.EntropyDaemon",
+    "org.bouncycastle.crypto.CryptoServicesRegistrar",
+    "org.bouncycastle.crypto.macs.HMac",
+    "org.bouncycastle.util.Properties",
+    "org.bouncycastle.util.Strings"
+  )
   override def nativeImageOptions: T[Seq[String]] = super.nativeImageOptions() ++ Seq(
     "--no-fallback",
-    "--rerun-class-initialization-at-runtime=org.bouncycastle.jcajce.provider.drbg.DRBG$Default,org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV"
+    s"--rerun-class-initialization-at-runtime=${bouncycastleRerunClasses.mkString(",")}"
   )
 
   def nameSuffix = ""
