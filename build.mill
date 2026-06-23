@@ -22,7 +22,7 @@ object Deps {
     def bouncycastle        = "1.84"
     def caseApp             = "2.1.0"
     def coursierPublish     = "0.4.4"
-    def coursierVersion     = "2.1.25-M23"
+    def coursierVersion     = "2.1.25-M25"
     def graalVmVersion      = "22.3.1"
     def graalVmId           = s"graalvm-java17:$graalVmVersion"
     def expecty             = "0.17.1"
