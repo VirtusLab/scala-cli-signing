@@ -1,6 +1,6 @@
 //| mvnDeps:
-//| - io.github.alexarchambault.mill::mill-native-image::0.2.4
-//| - io.github.alexarchambault.mill::mill-native-image-upload:0.2.4
+//| - io.github.alexarchambault.mill::mill-native-image::0.2.6
+//| - io.github.alexarchambault.mill::mill-native-image-upload:0.2.6
 //| - com.goyeau::mill-scalafix::0.6.0
 //| - com.lumidion::sonatype-central-client-requests:0.6.0
 package build
@@ -22,7 +22,7 @@ object Deps {
     def bouncycastle        = "1.84"
     def caseApp             = "2.1.0"
     def coursierPublish     = "0.4.4"
-    def coursierVersion     = "2.1.25-M23"
+    def coursierVersion     = "2.1.25-M25"
     def graalVmVersion      = "22.3.1"
     def graalVmId           = s"graalvm-java17:$graalVmVersion"
     def expecty             = "0.17.1"
@@ -94,9 +94,19 @@ trait CliNativeImage extends NativeImage {
   override def nativeImageMainClass: T[String]                   = Task {
     `native-cli`.mainClass().getOrElse(sys.error("no main class found"))
   }
+  private def bouncycastleRerunClasses: List[String] = List(
+    "org.bouncycastle.jcajce.provider.drbg.DRBG$Default",
+    "org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV",
+    "org.bouncycastle.jcajce.provider.drbg.DRBG",
+    "org.bouncycastle.jcajce.provider.drbg.EntropyDaemon",
+    "org.bouncycastle.crypto.CryptoServicesRegistrar",
+    "org.bouncycastle.crypto.macs.HMac",
+    "org.bouncycastle.util.Properties",
+    "org.bouncycastle.util.Strings"
+  )
   override def nativeImageOptions: T[Seq[String]] = super.nativeImageOptions() ++ Seq(
     "--no-fallback",
-    "--rerun-class-initialization-at-runtime=org.bouncycastle.jcajce.provider.drbg.DRBG$Default,org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV"
+    s"--rerun-class-initialization-at-runtime=${bouncycastleRerunClasses.mkString(",")}"
   )
 
   def nameSuffix = ""
