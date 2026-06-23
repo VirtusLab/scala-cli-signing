@@ -19,15 +19,15 @@ import com.goyeau.mill.scalafix.ScalafixModule
 
 object Deps {
   object Versions {
-    def bouncycastle        = "1.83"
+    def bouncycastle        = "1.84"
     def caseApp             = "2.1.0"
     def coursierPublish     = "0.4.4"
-    def coursierVersion     = "2.1.25-M19"
+    def coursierVersion     = "2.1.25-M23"
     def graalVmVersion      = "22.3.1"
     def graalVmId           = s"graalvm-java17:$graalVmVersion"
     def expecty             = "0.17.1"
-    def jsoniterScala       = "2.38.5"
-    def munit               = "1.2.1"
+    def jsoniterScala       = "2.38.9"
+    def munit               = "1.3.3"
     def osLib               = "0.11.8"
     def ubuntuDockerVersion = "ubuntu:24.04"
   }
@@ -47,7 +47,7 @@ object Deps {
 }
 
 object Scala {
-  def scala3 = "3.3.7"
+  def scala3 = "3.3.8"
 }
 
 def ghOrg      = "VirtusLab"
@@ -297,7 +297,7 @@ object ci extends Module {
       tag = tag,
       dryRun = false,
       overwrite = overwriteAssets
-    )(launchers *)
+    )(launchers*)
   }
 
   @unused
