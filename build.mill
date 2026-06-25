@@ -42,7 +42,6 @@ object Deps {
     mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros:${Versions.jsoniterScala}"
   def munit = mvn"org.scalameta::munit:${Versions.munit}"
   def osLib = mvn"com.lihaoyi::os-lib:${Versions.osLib}"
-  def svm   = mvn"org.graalvm.nativeimage:svm:${Versions.graalVmVersion}"
 
 }
 
@@ -94,19 +93,14 @@ trait CliNativeImage extends NativeImage {
   override def nativeImageMainClass: T[String]                   = Task {
     `native-cli`.mainClass().getOrElse(sys.error("no main class found"))
   }
-  private def bouncycastleRerunClasses: List[String] = List(
+  private def bouncycastleRunTimeClasses: List[String] = List(
     "org.bouncycastle.jcajce.provider.drbg.DRBG$Default",
-    "org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV",
-    "org.bouncycastle.jcajce.provider.drbg.DRBG",
-    "org.bouncycastle.jcajce.provider.drbg.EntropyDaemon",
-    "org.bouncycastle.crypto.CryptoServicesRegistrar",
-    "org.bouncycastle.crypto.macs.HMac",
-    "org.bouncycastle.util.Properties",
-    "org.bouncycastle.util.Strings"
+    "org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV"
   )
   override def nativeImageOptions: T[Seq[String]] = super.nativeImageOptions() ++ Seq(
     "--no-fallback",
-    s"--rerun-class-initialization-at-runtime=${bouncycastleRerunClasses.mkString(",")}"
+    "--initialize-at-build-time=org.bouncycastle,scala.cli.signing.internal.BCInitializer",
+    s"--initialize-at-run-time=${bouncycastleRunTimeClasses.mkString(",")}"
   )
 
   def nameSuffix = ""
@@ -147,8 +141,8 @@ trait Cli  extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
   }
 }
 object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
-  override def mvnDeps: T[Seq[Dep]] = super.mvnDeps() ++ Seq(Deps.svm)
-  override def moduleDeps: Seq[Cli] = Seq(cli)
+  override def javacOptions: T[Seq[String]] = super.javacOptions() ++ Seq("--release", "17")
+  override def moduleDeps: Seq[Cli]         = Seq(cli)
 
   override def mainClass: T[Option[String]] = cli.mainClass()
 
@@ -239,17 +233,22 @@ trait CliTests extends ScalaModule {
       "SIGNING_CLI_TMP"  -> tmpDirBase().path.toString
     )
 
+    private def integrationScalaSources =
+      Task.Source(BuildCtx.workspaceRoot / "integration" / "src" / "main" / "scala")
+    private def integrationResources =
+      Task.Source(BuildCtx.workspaceRoot / "integration" / "src" / "main" / "resources")
+
     override def sources: T[Seq[PathRef]] = Task {
       val name = mainArtifactName().stripPrefix(prefix)
       super.sources().flatMap { ref =>
         Seq(updateRef(name, ref), ref)
-      }
+      } ++ Seq(integrationScalaSources())
     }
     override def resources: T[Seq[PathRef]] = Task {
       val name = mainArtifactName().stripPrefix(prefix)
       super.resources().flatMap { ref =>
         Seq(updateRef(name, ref), ref)
-      }
+      } ++ Seq(integrationResources())
     }
   }
 }
