@@ -154,7 +154,10 @@ object `native-cli` extends ScalaCliSigningModule with ScalaCliSigningPublish { 
       Some(
         NativeImage.linuxStaticParams(
           s"$helperImageName:latest",
-          s"https://github.com/coursier/coursier/releases/download/v${Deps.Versions.coursierVersion}/cs-x86_64-pc-linux.gz"
+          s"https://github.com/coursier/coursier/releases/download/v${Deps.Versions.coursierVersion}/cs-x86_64-pc-linux-static.gz"
+        ).copy(
+          prepareCommand =
+            """(cd /usr/local/musl/bin && ln -sf x86_64-linux-musl-gcc musl-gcc) && export PATH="/usr/local/musl/bin:$PATH""""
         )
       )
     }

@@ -7,3 +7,5 @@ for i in x86_64-unknown-linux-musl-*; do
   dest="$(echo "$i" | sed 's/-unknown//')"
   ln -s "$i" "$dest"
 done
+
+ln -sf x86_64-linux-musl-gcc musl-gcc
