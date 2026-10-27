@@ -21,7 +21,7 @@ object Deps {
   object Versions {
     def bouncycastle        = "1.86"
     def caseApp             = "2.1.1"
-    def coursierPublish     = "0.4.4"
+    def scalaPublish        = "1.0.0"
     def coursierVersion     = "2.1.25-M26"
     def graalVmJavaVersion  = 17
     def graalVmVersion      = s"$graalVmJavaVersion.0.9"
@@ -35,7 +35,7 @@ object Deps {
   def bouncycastle      = mvn"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
   def bouncycastleUtils = mvn"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
   def caseApp           = mvn"com.github.alexarchambault::case-app:${Versions.caseApp}"
-  def coursierPublish   = mvn"io.get-coursier.publish::publish:${Versions.coursierPublish}"
+  def scalaPublish      = mvn"org.scala-lang::scala-publish:${Versions.scalaPublish}"
   def expecty           = mvn"com.eed3si9n.expecty::expecty:${Versions.expecty}"
   def jsoniterCore      =
     mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
@@ -125,7 +125,7 @@ trait Cli  extends ScalaCliSigningModule with ScalaCliSigningPublish { self =>
     Deps.bouncycastle,
     Deps.bouncycastleUtils,
     Deps.caseApp,
-    Deps.coursierPublish // we can probably get rid of that one
+    Deps.scalaPublish // we can probably get rid of that one
   )
   override def moduleDeps: Seq[Shared]      = Seq(shared)
   override def mainClass: T[Option[String]] = Some("scala.cli.signing.ScalaCliSigning")

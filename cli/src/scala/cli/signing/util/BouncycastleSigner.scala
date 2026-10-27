@@ -1,7 +1,5 @@
 package scala.cli.signing.util
 
-import coursier.publish.Content
-import coursier.publish.signing.Signer
 import org.bouncycastle.bcpg.sig.KeyFlags
 import org.bouncycastle.bcpg.{
   ArmoredOutputStream,
@@ -25,6 +23,8 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, PrintW
 import scala.cli.signing.shared.Secret
 import scala.cli.signing.util.Util.maybeDecodeBase64
 import scala.jdk.CollectionConverters.*
+import scala.publish.Content
+import scala.publish.signing.Signer
 import scala.util.Try
 
 final case class BouncycastleSigner(
