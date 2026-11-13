@@ -15,8 +15,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-      - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/cache-action@v9
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - name: Run unit tests
@@ -44,8 +44,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-      - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/cache-action@v9
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - run: |
@@ -72,8 +72,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-      - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/cache-action@v9
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - run: |
@@ -96,8 +96,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-      - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/cache-action@v9
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - run: |
@@ -122,8 +122,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-      - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/cache-action@v9
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - uses: actions/download-artifact@v6
@@ -178,8 +178,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-      - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/cache-action@v9
+      - uses: coursier/setup-action@v3
         with:
           jvm: zulu:25
       - name: Run scalafix
@@ -194,8 +194,8 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
-    - uses: coursier/cache-action@v7
-    - uses: coursier/setup-action@v1
+    - uses: coursier/cache-action@v9
+    - uses: coursier/setup-action@v3
       with:
         jvm: "zulu:25"
     - name: GPG setup

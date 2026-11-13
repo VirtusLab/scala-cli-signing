@@ -1,11 +1,7 @@
 //| mill-jvm-version: system|25
-//| mvnDeps:
-//| - io.github.alexarchambault.mill::mill-native-image::0.2.6
-//| - io.github.alexarchambault.mill::mill-native-image-upload:0.2.6
-//| - com.goyeau::mill-scalafix::0.6.0
-//| - com.lumidion::sonatype-central-client-requests:0.6.0
 package build
 
+import build.project.deps.{Deps, Java, Scala}
 import build.project.publish.{finalPublishVersion, publishSonatype => publishSonatype0}
 import io.github.alexarchambault.millnativeimage.NativeImage
 import io.github.alexarchambault.millnativeimage.upload.Upload
@@ -15,57 +11,8 @@ import mill.scalalib.*
 import mill.util.{Tasks, VcsVersion}
 
 import java.io.File
-import java.util.Locale
 import scala.annotation.unused
-import scala.util.Properties
 import com.goyeau.mill.scalafix.ScalafixModule
-
-object Java {
-  // the JDK Mill runs on & compiles with, also used as the GraalVM Java version for native images
-  def buildJava = 25
-  // the Java version targeted by the produced bytecode & JDK API (via -java-output-version / --release)
-  def outputJava = 17
-}
-
-object Deps {
-  object Versions {
-    def bouncycastle    = "1.87"
-    def caseApp         = "2.2.0"
-    def scalaPublish    = "1.0.0"
-    def coursierVersion = "2.1.25-M26"
-    def graalVmVersion  = s"${Java.buildJava}.0.2"
-    // there are no GraalVM CE builds for macOS x64 past 25.0.1
-    def graalVmMacosX64Version = s"${Java.buildJava}.0.1"
-    def graalVmId              = {
-      val isArm   = sys.props.getOrElse("os.arch", "").toLowerCase(Locale.ROOT) == "aarch64"
-      val version =
-        if Properties.isMac && !isArm then graalVmMacosX64Version
-        else graalVmVersion
-      s"graalvm-community:$version"
-    }
-    def expecty             = "0.17.1"
-    def jsoniterScala       = "2.42.3"
-    def munit               = "1.3.6"
-    def osLib               = "0.11.10"
-    def ubuntuDockerVersion = "ubuntu:24.04"
-  }
-  def bouncycastle      = mvn"org.bouncycastle:bcpg-jdk18on:${Versions.bouncycastle}"
-  def bouncycastleUtils = mvn"org.bouncycastle:bcutil-jdk18on:${Versions.bouncycastle}"
-  def caseApp           = mvn"com.github.alexarchambault::case-app:${Versions.caseApp}"
-  def scalaPublish      = mvn"org.scala-lang::scala-publish:${Versions.scalaPublish}"
-  def expecty           = mvn"com.eed3si9n.expecty::expecty:${Versions.expecty}"
-  def jsoniterCore      =
-    mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:${Versions.jsoniterScala}"
-  def jsoniterMacros =
-    mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros:${Versions.jsoniterScala}"
-  def munit = mvn"org.scalameta::munit:${Versions.munit}"
-  def osLib = mvn"com.lihaoyi::os-lib:${Versions.osLib}"
-
-}
-
-object Scala {
-  def scala3 = "3.9.0"
-}
 
 def ghOrg      = "VirtusLab"
 def ghName     = "scala-cli-signing"

@@ -21,6 +21,30 @@ That way
 
 scala-cli-signing is built with Mill.
 
+The build depends on git submodules, so make sure they're checked out before building:
+```text
+$ git clone --recurse-submodules https://github.com/VirtusLab/scala-cli-signing.git
+# or, in an existing clone
+$ git submodule update --init
+```
+
+### Mill plugins built from source
+
+The [mill-native-image](https://github.com/alexarchambault/mill-native-image) Mill plugin (and its
+`mill-native-image-upload` companion) is not pulled as a published artifact. Instead, its sources live in the
+`mill-native-image/` git submodule and are compiled by the Mill meta-build (`mill-build/build.mill`),
+against the Mill version used by the build. The meta-build also declares the other Mill plugin dependencies of the build.
+
+To bump it, check out the desired commit in the submodule and commit the updated submodule pointer:
+```text
+$ git -C mill-native-image fetch origin
+$ git -C mill-native-image checkout <commit>
+$ git add mill-native-image
+```
+
+All dependency versions (including those of the meta-build) are defined in `project/deps/package.mill`.
+The meta-build reuses them via `mill-build/mill-build/build.mill`, which compiles that file as a plain Scala source.
+
 Compile everything with
 ```text
 $ ./mill __.compile
