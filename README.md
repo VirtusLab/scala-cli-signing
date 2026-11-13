@@ -42,6 +42,9 @@ $ git -C mill-native-image checkout <commit>
 $ git add mill-native-image
 ```
 
+All dependency versions (including those of the meta-build) are defined in `project/deps/package.mill`.
+The meta-build reuses them via `mill-build/mill-build/build.mill`, which compiles that file as a plain Scala source.
+
 Compile everything with
 ```text
 $ ./mill __.compile
