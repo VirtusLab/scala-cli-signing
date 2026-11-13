@@ -18,7 +18,7 @@ jobs:
       - uses: coursier/cache-action@v7
       - uses: coursier/setup-action@v1
         with:
-          jvm: "temurin:17"
+          jvm: "zulu:25"
       - name: Run unit tests
         run: ./mill -i cli.test
       - name: Run JVM integration tests
@@ -47,16 +47,14 @@ jobs:
       - uses: coursier/cache-action@v7
       - uses: coursier/setup-action@v1
         with:
-          jvm: "temurin:17"
+          jvm: "zulu:25"
       - run: |
           cs java --update --ttl 0 -version && \
           ./mill -i "native-cli.base-image.writeNativeImageScript" --scriptDest generate.sh --imageDest "" && \
           ./generate.sh && \
           ./mill -i "native-cli.base-image.copyToArtifacts" --directory artifacts/
         if: runner.os != 'Windows'
-      - run: |
-          export USE_NATIVE_IMAGE_JAVA_PLATFORM_MODULE_SYSTEM=false
-          .github/scripts/generate-native-image-windows.sh
+      - run: .github/scripts/generate-native-image-windows.sh
         shell: bash
         if: runner.os == 'Windows'
       - uses: actions/upload-artifact@v5
@@ -77,7 +75,7 @@ jobs:
       - uses: coursier/cache-action@v7
       - uses: coursier/setup-action@v1
         with:
-          jvm: "temurin:17"
+          jvm: "zulu:25"
       - run: |
           cs java --update --ttl 0 -version && \
           ./mill -i "native-cli.static-image.writeNativeImageScript" --scriptDest generate.sh --imageDest "" && \
@@ -101,7 +99,7 @@ jobs:
       - uses: coursier/cache-action@v7
       - uses: coursier/setup-action@v1
         with:
-          jvm: "temurin:17"
+          jvm: "zulu:25"
       - run: |
           cs java --update --ttl 0 -version && \
           ./mill -i "native-cli.mostly-static-image.writeNativeImageScript" --scriptDest generate.sh --imageDest "" && \
@@ -127,7 +125,7 @@ jobs:
       - uses: coursier/cache-action@v7
       - uses: coursier/setup-action@v1
         with:
-          jvm: "temurin:17"
+          jvm: "zulu:25"
       - uses: actions/download-artifact@v6
         with:
           name: launchers-ubuntu
@@ -183,7 +181,7 @@ jobs:
       - uses: coursier/cache-action@v7
       - uses: coursier/setup-action@v1
         with:
-          jvm: temurin:17
+          jvm: zulu:25
       - name: Run scalafix
         run: ./mill -i __.fix --check
 
@@ -199,7 +197,7 @@ jobs:
     - uses: coursier/cache-action@v7
     - uses: coursier/setup-action@v1
       with:
-        jvm: "temurin:17"
+        jvm: "zulu:25"
     - name: GPG setup
       run: .github/scripts/gpg-setup.sh
       env:
