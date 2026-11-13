@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
           submodules: true
       - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - name: Run unit tests
@@ -45,7 +45,7 @@ jobs:
           fetch-depth: 0
           submodules: true
       - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - run: |
@@ -73,7 +73,7 @@ jobs:
           fetch-depth: 0
           submodules: true
       - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - run: |
@@ -97,7 +97,7 @@ jobs:
           fetch-depth: 0
           submodules: true
       - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - run: |
@@ -123,7 +123,7 @@ jobs:
           fetch-depth: 0
           submodules: true
       - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/setup-action@v3
         with:
           jvm: "zulu:25"
       - uses: actions/download-artifact@v6
@@ -179,7 +179,7 @@ jobs:
           fetch-depth: 0
           submodules: true
       - uses: coursier/cache-action@v7
-      - uses: coursier/setup-action@v1
+      - uses: coursier/setup-action@v3
         with:
           jvm: zulu:25
       - name: Run scalafix
@@ -195,7 +195,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v7
-    - uses: coursier/setup-action@v1
+    - uses: coursier/setup-action@v3
       with:
         jvm: "zulu:25"
     - name: GPG setup
