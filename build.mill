@@ -32,7 +32,7 @@ object Deps {
     def bouncycastle    = "1.87"
     def caseApp         = "2.2.0"
     def scalaPublish    = "1.0.0"
-    def coursierVersion = "2.1.25-M26"
+    def coursierVersion = "2.1.26"
     def graalVmVersion  = s"${Java.buildJava}.0.2"
     // there are no GraalVM CE builds for macOS x64 past 25.0.1
     def graalVmMacosX64Version = s"${Java.buildJava}.0.1"
