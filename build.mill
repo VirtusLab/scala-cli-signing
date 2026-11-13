@@ -3,6 +3,7 @@ package build
 
 import build.project.deps.{Deps, Java, Scala}
 import build.project.publish.{finalPublishVersion, publishSonatype => publishSonatype0}
+import build.project.writeTrustStoreWithoutCompromisedCas
 import io.github.alexarchambault.millnativeimage.NativeImage
 import io.github.alexarchambault.millnativeimage.upload.Upload
 import mill.*
@@ -66,11 +67,36 @@ trait CliNativeImage extends NativeImage {
     "org.bouncycastle.jcajce.provider.drbg.DRBG$Default",
     "org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV"
   )
-  override def nativeImageOptions: T[Seq[String]] = super.nativeImageOptions() ++ Seq(
-    "--no-fallback",
-    "--initialize-at-build-time=org.bouncycastle,scala.cli.signing.internal.BCInitializer",
-    s"--initialize-at-run-time=${bouncycastleRunTimeClasses.mkString(",")}"
-  )
+  override def nativeImageOptions: T[Seq[String]] = Task {
+    // native images embed the trust store used at build time
+    val trustStorePath =
+      if nativeImageDockerParams().nonEmpty then s"/data/$trustStoreDirName/$trustStoreFileName"
+      else (trustStoreDir().path / trustStoreFileName).toString
+    super.nativeImageOptions() ++ Seq(
+      "--no-fallback",
+      "--initialize-at-build-time=org.bouncycastle,scala.cli.signing.internal.BCInitializer",
+      s"--initialize-at-run-time=${bouncycastleRunTimeClasses.mkString(",")}",
+      s"-J-Djavax.net.ssl.trustStore=$trustStorePath",
+      "-J-Djavax.net.ssl.trustStorePassword=changeit"
+    )
+  }
+
+  private def trustStoreDirName  = "trust-store"
+  private def trustStoreFileName = "cacerts"
+  // the GraalVM versions in use still trust the compromised eMudhra CAs (CVE-2026-91403),
+  // so a trust store without them is passed to native-image
+  def trustStoreDir: T[PathRef] = Task {
+    BuildCtx.withFilesystemCheckerDisabled {
+      // inside nativeImageDockerWorkingDir, so that it's mounted under /data in docker builds
+      val dir     = nativeImageDockerWorkingDir() / trustStoreDirName
+      val source  = nativeImageGraalvmHome().path / "lib" / "security" / "cacerts"
+      val removed = writeTrustStoreWithoutCompromisedCas(source, dir / trustStoreFileName)
+      System.err.println(
+        s"Removed from the native image trust store:${removed.map("\n  " + _).mkString}"
+      )
+      PathRef(dir)
+    }
+  }
 
   def nameSuffix = ""
 
