@@ -3,10 +3,11 @@ package scala.cli.signing.commands
 import caseapp.core.RemainingArgs
 import caseapp.core.app.Command
 
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
 import scala.cli.signing.util.{BouncycastleSigner, Util}
+import scala.publish.Content
 
 object PgpSign extends Command[PgpSignOptions] {
 
@@ -35,21 +36,7 @@ object PgpSign extends Command[PgpSignOptions] {
         if (options.stdout) Left(System.out)
         else Right(path / os.up / s"${path.last}.asc")
 
-      val res = signer.sign { f =>
-        var is: InputStream = null
-        try {
-          is = os.read.inputStream(path)
-          val b    = Array.ofDim[Byte](16 * 1024)
-          var read = 0
-          while ({
-            read = is.read(b)
-            read >= 0
-          })
-            if (read > 0)
-              f(b, 0, read)
-        }
-        finally is.close()
-      }
+      val res = signer.sign(Content.File(path.toNIO))
 
       res match {
         case Left(err) =>
