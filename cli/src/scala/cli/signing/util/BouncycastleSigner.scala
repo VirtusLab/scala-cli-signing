@@ -31,10 +31,25 @@ final case class BouncycastleSigner(
   pgpSecretKey: PGPSecretKey,
   passwordOpt: Option[Secret[String]]
 ) extends Signer {
-  def sign(content: Content): Either[String, String] =
+
+  /** Signs `content`, streaming it rather than loading it in memory. */
+  def sign(content: Content): Either[String, String] = {
+    val is = content.inputStream()
+    try sign(is)
+    finally is.close()
+  }
+
+  /** Signs what's read from `content`, streaming it. Doesn't close `content`. */
+  def sign(content: InputStream): Either[String, String] =
     sign { f =>
-      val b = content.content()
-      f(b, 0, b.length)
+      val buf  = Array.ofDim[Byte](BouncycastleSigner.bufferSize)
+      var read = -1
+      while ({
+        read = content.read(buf)
+        read >= 0
+      })
+        if (read > 0)
+          f(buf, 0, read)
     }
 
   def sign(withContent: ((Array[Byte], Int, Int) => Unit) => Unit): Either[String, String] = {
@@ -118,6 +133,8 @@ object BouncycastleSigner {
   )
   private def KEY_FLAGS = 27
 
+  private[util] def bufferSize = 16 * 1024
+
   private def hasKeyFlags(encKey: PGPPublicKey, keyUsage: Int): Boolean =
     if (encKey.isMasterKey)
       MASTER_KEY_CERTIFICATION_TYPES
@@ -196,7 +213,7 @@ object BouncycastleSigner {
 
     sig.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key)
 
-    val buf  = Array.ofDim[Byte](16 * 1024)
+    val buf  = Array.ofDim[Byte](bufferSize)
     var read = -1
     while ({
       read = content.read(buf)
